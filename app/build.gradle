@@ -7,12 +7,14 @@ plugins {
 }
 
 android {
-    compileSdk = rootProject.ext.compileSdkVersion
+    def sdkVersion = rootProject.ext.compileSdkVersion
+
+    compileSdkVersion sdkVersion
 
     defaultConfig {
         applicationId "br.com.pedrotlf.barcalc"
-        minSdk 27
-        targetSdk 31
+        minSdk rootProject.ext.minSdk
+        targetSdk sdkVersion
         versionCode 1
         versionName "1.0"
 
