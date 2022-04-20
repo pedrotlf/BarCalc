@@ -1,7 +1,8 @@
-package br.com.pedrotlf.barcalc
+package br.com.pedrotlf.barcalc.presentation
 
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
+import br.com.pedrotlf.barcalc.R
 
 class MainActivity : AppCompatActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {

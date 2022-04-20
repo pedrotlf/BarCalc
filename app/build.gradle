@@ -15,8 +15,8 @@ android {
         applicationId "br.com.pedrotlf.barcalc"
         minSdk rootProject.ext.minSdk
         targetSdk sdkVersion
-        versionCode 1
-        versionName "1.0"
+        versionCode rootProject.ext.versionCode
+        versionName rootProject.ext.versionName
 
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
     }
