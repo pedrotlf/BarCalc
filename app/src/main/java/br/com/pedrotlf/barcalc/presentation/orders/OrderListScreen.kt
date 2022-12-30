@@ -118,9 +118,9 @@ fun OrderCard(
     order: Order,
     onValueChangedCallback: (newOrder: Order) -> Unit
 ) {
-    var amount by remember { mutableStateOf(order.amount.toString()) }
-    var name by remember { mutableStateOf(order.name) }
-    var price by remember { mutableStateOf(order.price?.toString()?.filter { it.isDigit() }) }
+    val amount = order.amount?.toString()
+    val name = order.name
+    val price = order.price?.toString()?.filter { it.isDigit() }
     val maxAmountLenght = 3
     val maxNameLenght = 32
 
@@ -142,10 +142,12 @@ fun OrderCard(
             ) {
                 OutlinedTextField(
                     modifier = Modifier.weight(0.2f),
-                    value = amount,
+                    singleLine = true,
+                    value = amount.orEmpty(),
                     onValueChange = {
-                        if(it.length <= maxAmountLenght)
-                            amount = it
+                        if(it.length <= maxAmountLenght) {
+                            onValueChangedCallback(order.copy(amount = it.toIntOrNull()))
+                        }
                     },
                     keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.NumberPassword),
                     label = { Text(text = "Nº") },
@@ -157,7 +159,7 @@ fun OrderCard(
                     value = name.orEmpty(),
                     onValueChange = {
                         if(it.length <= maxNameLenght)
-                            name = it
+                            onValueChangedCallback(order.copy(name = it))
                     },
                     label = { Text(text = "Name") },
                     placeholder = { Text(text = "Item's name") }
@@ -174,12 +176,16 @@ fun OrderCard(
                     modifier = Modifier.weight(0.4f, false),
                     singleLine = true,
                     value = price.orEmpty(),
-                    onValueChange = {
-                        price = if (it.startsWith("0")) {
-                            ""
-                        } else {
-                            it
-                        }
+                    onValueChange = { price ->
+                        onValueChangedCallback(
+                            order.copy(
+                                price = (if (price.startsWith("0")) {
+                                        ""
+                                    } else {
+                                        price
+                                    }).toIntOrNull()
+                            )
+                        )
                     },
                     keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.NumberPassword),
                     label = { Text(text = "Price") },

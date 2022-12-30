@@ -21,11 +21,10 @@ class OrderViewModel @Inject constructor(): ViewModel() {
         editOrder(index, order.name, order.price, order.amount)
     }
 
-    fun editOrder(index: Int, name: String?, price: Double?, amount: Int) = viewModelScope.launch {
+    fun editOrder(index: Int, name: String?, price: Int?, amount: Int?) = viewModelScope.launch {
         val list = orderList.value
         orderList.value = list.toMutableList().also {
-            it.removeAt(index)
-            it.add(index, Order(name, price, amount))
+            it[index] = Order(name, price, amount)
         }
     }
 }
