@@ -116,7 +116,7 @@ private fun ResultCard(
     Column(
         Modifier
             .fillMaxWidth()
-            .clip(RoundedCornerShape(BarTabDimens.RadiusXl))
+            .clip(RoundedCornerShape(BarTabDimens.RadiusLg))
             .background(BarTabColors.Surface)
             .padding(horizontal = BarTabDimens.CardPadding, vertical = 10.dp),
         verticalArrangement = Arrangement.spacedBy(8.dp),
