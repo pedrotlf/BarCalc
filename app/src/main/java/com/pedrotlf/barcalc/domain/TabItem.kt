@@ -44,6 +44,22 @@ data class TabItem(
         return copy(units = newUnits)
     }
 
+    /**
+     * Claim ([claimed] = true) or release every unit for [personId] in one go.
+     * Other people's claims on each unit are left untouched.
+     */
+    fun withAllUnitsClaimed(personId: Int, claimed: Boolean): TabItem =
+        copy(
+            units = units.map { unit ->
+                if (claimed) (if (personId in unit) unit else unit + personId)
+                else unit.filter { it != personId }
+            }
+        )
+
+    /** True when [personId] is on every unit of this item. */
+    fun allUnitsClaimedBy(personId: Int): Boolean =
+        units.isNotEmpty() && units.all { personId in it }
+
     /** Remove every claim by [personId] (used when a person is deleted). */
     fun withPersonRemoved(personId: Int): TabItem =
         copy(units = units.map { unit -> unit.filter { it != personId } })

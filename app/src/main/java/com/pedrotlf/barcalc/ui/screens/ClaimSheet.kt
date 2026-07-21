@@ -182,11 +182,19 @@ private fun ClaimRow(item: TabItem, person: Person, onAction: (TabAction) -> Uni
                 colors = accentCheckboxColors(),
             )
         } else {
+            val allClaimed = item.allUnitsClaimedBy(person.id)
             FlowRow(
                 horizontalArrangement = Arrangement.spacedBy(6.dp, Alignment.End),
                 verticalArrangement = Arrangement.spacedBy(6.dp),
                 modifier = Modifier.widthIn(max = 160.dp),
             ) {
+                // One tap to claim (or release) every unit at once.
+                AllChip(
+                    active = allClaimed,
+                    onClick = {
+                        onAction(TabAction.SetAllUnitsClaim(item.id, person.id, !allClaimed))
+                    },
+                )
                 item.units.forEachIndexed { unitIndex, unit ->
                     UnitChip(
                         index = unitIndex + 1,
@@ -199,6 +207,34 @@ private fun ClaimRow(item: TabItem, person: Person, onAction: (TabAction) -> Uni
                 }
             }
         }
+    }
+}
+
+/** Chip that claims or releases every unit of an item at once. */
+@Composable
+private fun AllChip(active: Boolean, onClick: () -> Unit) {
+    Box(
+        Modifier
+            .defaultMinSize(minWidth = 30.dp, minHeight = 30.dp)
+            .clip(RoundedCornerShape(9.dp))
+            .background(if (active) BarTabColors.Accent500 else BarTabColors.Bg)
+            .roundedBorder(
+                color = if (active) BarTabColors.Accent500 else BarTabColors.Accent300,
+                cornerRadius = 9.dp,
+                strokeWidth = 1.5.dp,
+            )
+            .clickable(onClick = onClick)
+            .padding(horizontal = 8.dp),
+        contentAlignment = Alignment.Center,
+    ) {
+        Text(
+            stringResource(R.string.claim_all),
+            style = BarTabType.Body.copy(
+                fontSize = 12.sp,
+                fontWeight = FontWeight.Bold,
+                color = if (active) Color.White else BarTabColors.Neutral600,
+            ),
+        )
     }
 }
 

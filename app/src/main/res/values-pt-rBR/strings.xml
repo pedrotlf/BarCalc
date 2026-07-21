@@ -41,6 +41,8 @@
 
     <!-- Folha de atribuição -->
     <string name="claim_instructions">Toque num número para entrar naquela unidade — compartilhar uma com alguém divide o custo.</string>
+    <!-- Chip que atribui/remove todas as unidades de um item de uma vez -->
+    <string name="claim_all">Todas</string>
     <string name="unit_price_each">%1$s cada</string>
     <string name="done">Concluir</string>
     <string name="cd_close">Fechar</string>

@@ -4,6 +4,7 @@ import com.pedrotlf.barcalc.domain.SplitCalculator
 import com.pedrotlf.barcalc.domain.TabItem
 import com.pedrotlf.barcalc.domain.TipSplitMode
 import org.junit.Assert.assertEquals
+import org.junit.Assert.assertFalse
 import org.junit.Assert.assertNull
 import org.junit.Assert.assertTrue
 import org.junit.Test
@@ -148,6 +149,30 @@ class SplitCalculatorTest {
     fun `removing a person strips all their claims`() {
         val item = sharedBeers().withPersonRemoved(alice)
         assertEquals(listOf(emptyList<Int>(), emptyList(), listOf(bob)), item.units)
+    }
+
+    @Test
+    fun `claim all units adds person to every unit and preserves others`() {
+        // Bob already shares unit 2 in sharedBeers(); Alice claims all.
+        val item = sharedBeers().withAllUnitsClaimed(bob, claimed = true)
+        assertTrue(item.allUnitsClaimedBy(bob))
+        // Alice's pre-existing claims on units 0 and 1 are untouched.
+        assertTrue(item.units.all { alice in it })
+    }
+
+    @Test
+    fun `release all units removes only that person`() {
+        val item = sharedBeers().withAllUnitsClaimed(alice, claimed = false)
+        assertTrue(item.units.none { alice in it })
+        // Bob's share of unit 2 remains.
+        assertEquals(listOf(bob), item.units[2])
+        assertFalse(item.allUnitsClaimedBy(alice))
+    }
+
+    @Test
+    fun `allUnitsClaimedBy is false when any unit is unclaimed by the person`() {
+        val partial = TabItem.new(1, "Beer", 1000L, 3).withClaimToggled(0, alice)
+        assertFalse(partial.allUnitsClaimedBy(alice))
     }
 
     @Test

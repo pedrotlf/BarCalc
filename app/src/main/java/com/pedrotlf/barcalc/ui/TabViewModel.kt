@@ -70,6 +70,8 @@ class TabViewModel(
             TabAction.CloseSheet -> closeSheet()
             is TabAction.ToggleUnitClaim ->
                 toggleUnitClaim(action.itemId, action.unitIndex, action.personId)
+            is TabAction.SetAllUnitsClaim ->
+                setAllUnitsClaim(action.itemId, action.personId, action.claimed)
             TabAction.ToggleTip -> toggleTip()
             TabAction.IncTip -> incTip()
             TabAction.DecTip -> decTip()
@@ -193,6 +195,10 @@ class TabViewModel(
 
     fun toggleUnitClaim(itemId: Int, unitIndex: Int, personId: Int) = updateItems { items ->
         items.map { if (it.id == itemId) it.withClaimToggled(unitIndex, personId) else it }
+    }
+
+    fun setAllUnitsClaim(itemId: Int, personId: Int, claimed: Boolean) = updateItems { items ->
+        items.map { if (it.id == itemId) it.withAllUnitsClaimed(personId, claimed) else it }
     }
 
     // ── Tip ────────────────────────────────────────────────────────────────
