@@ -26,6 +26,7 @@ sealed interface TabAction {
     data class OpenPerson(val id: Int) : TabAction
     data object CloseSheet : TabAction
     data class ToggleUnitClaim(val itemId: Int, val unitIndex: Int, val personId: Int) : TabAction
+    data class SetAllUnitsClaim(val itemId: Int, val personId: Int, val claimed: Boolean) : TabAction
     data object ToggleTip : TabAction
     data object IncTip : TabAction
     data object DecTip : TabAction

@@ -41,6 +41,8 @@
 
     <!-- Claim sheet -->
     <string name="claim_instructions">Tap a number to join that unit — sharing one with someone splits its cost.</string>
+    <!-- Chip that claims/releases all units of an item at once -->
+    <string name="claim_all">All</string>
     <string name="unit_price_each">%1$s each</string>
     <string name="done">Done</string>
     <string name="cd_close">Close</string>
