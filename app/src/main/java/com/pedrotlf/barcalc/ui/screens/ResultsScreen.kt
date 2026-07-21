@@ -69,11 +69,20 @@ fun ResultsScreen(state: TabUiState, onAction: (TabAction) -> Unit) {
     ) {
         ScreenHeader(
             stringResource(R.string.results_title),
-            stringResource(
-                R.string.results_subtitle,
-                peopleLabel,
-                SplitCalculator.formatMoney(subtotal + tipAmount, currency),
-            ),
+            if (state.tipEnabled) {
+                stringResource(
+                    R.string.results_subtitle_with_tip,
+                    peopleLabel,
+                    SplitCalculator.formatMoney(subtotal, currency),
+                    SplitCalculator.formatMoney(subtotal + tipAmount, currency),
+                )
+            } else {
+                stringResource(
+                    R.string.results_subtitle,
+                    peopleLabel,
+                    SplitCalculator.formatMoney(subtotal, currency),
+                )
+            },
         )
         Column(
             Modifier.padding(
@@ -168,6 +177,14 @@ private fun ResultCard(
                     )
                 }
                 if (state.tipEnabled) {
+                    // Their own total before tip — redundant when tip is off, since
+                    // the main row above already shows exactly this amount. Bolded
+                    // to stand out from the item lines above it.
+                    BreakdownLine(
+                        stringResource(R.string.subtotal),
+                        SplitCalculator.formatMoney(itemsTotal, currency),
+                        emphasized = true,
+                    )
                     BreakdownLine(
                         stringResource(R.string.tip_share),
                         SplitCalculator.formatMoney(tipShare, currency),
@@ -179,12 +196,16 @@ private fun ResultCard(
 }
 
 @Composable
-private fun BreakdownLine(label: String, amount: String) {
+private fun BreakdownLine(label: String, amount: String, emphasized: Boolean = false) {
     Row(
         Modifier.fillMaxWidth(),
         horizontalArrangement = Arrangement.SpaceBetween,
     ) {
-        val style = BarTabType.Body.copy(fontSize = 13.sp, color = BarTabColors.Neutral700)
+        val style = if (emphasized) {
+            BarTabType.Money
+        } else {
+            BarTabType.Body.copy(fontSize = 13.sp, color = BarTabColors.Neutral700)
+        }
         Text(label, style = style)
         Text(amount, style = style)
     }
