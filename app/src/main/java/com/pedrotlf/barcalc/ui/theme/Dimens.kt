@@ -17,11 +17,11 @@ object BarTabDimens {
     /** Inner padding of the dashed add-cards. */
     val CardPadding = 14.dp
 
-    val RadiusSm = 8.dp
-    val RadiusMd = 16.dp
+    val RadiusSm = 4.dp
+    val RadiusMd = 8.dp
 
     /** Item rows, add-cards, the claim sheet. */
-    val RadiusLg = 28.dp
+    val RadiusLg = 16.dp
 
     /** Person/result cards (design: radius-lg * 1.15). */
     val RadiusXl = 32.dp
