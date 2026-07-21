@@ -1,0 +1,16 @@
+# Normalize line endings: store LF in the repo, check out native on Windows.
+* text=auto eol=lf
+
+# Windows batch scripts must stay CRLF; the Unix wrapper must stay LF.
+*.bat text eol=crlf
+gradlew text eol=lf
+
+# Binary assets — never touch line endings or diff as text.
+*.jar binary
+*.ttf binary
+*.otf binary
+*.png binary
+*.webp binary
+*.jpg binary
+*.keystore binary
+*.jks binary

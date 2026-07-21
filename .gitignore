@@ -1,0 +1,38 @@
+# Built application files & Gradle
+*.apk
+*.aar
+*.ap_
+*.aab
+*.dex
+*.class
+/build
+/captures
+.gradle/
+build/
+
+# Kotlin
+.kotlin/
+
+# Local configuration (SDK path, machine-specific) — never commit
+local.properties
+
+# IntelliJ / Android Studio — machine- and user-specific IDE config
+*.iml
+.idea/
+
+# Native builds
+.externalNativeBuild
+.cxx/
+
+# Signing keys & secrets — must never be committed
+*.jks
+*.keystore
+keystore.properties
+secrets.properties
+
+# OS cruft
+.DS_Store
+Thumbs.db
+
+# Claude Code local tooling config
+.claude/

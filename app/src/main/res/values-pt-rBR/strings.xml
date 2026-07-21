@@ -1,0 +1,63 @@
+<resources xmlns:tools="http://schemas.android.com/tools">
+    <string name="app_name">Dividir a Conta</string>
+
+    <!-- Moeda: símbolo prefixado em cada valor. -->
+    <string name="currency_symbol">R$</string>
+
+    <!-- Tela 1: Itens -->
+    <string name="items_title">Comanda</string>
+    <string name="items_subtitle">Adicione cada item da comanda</string>
+    <string name="item_name_hint">Nome do item</string>
+    <string name="price_hint">0,00</string>
+    <string name="items_empty">Nenhum item ainda — adicione a primeira rodada acima.</string>
+    <string name="subtotal">Subtotal</string>
+    <string name="next">Avançar</string>
+    <string name="add_item_disabled_hint">Adicione ao menos um item para continuar</string>
+    <string name="cd_add_item">Adicionar item</string>
+    <string name="cd_remove_item">Remover item</string>
+
+    <!-- Tela 2: Pessoas -->
+    <string name="people_title">Quem vai dividir?</string>
+    <string name="people_subtitle">Toque em uma pessoa para atribuir os itens</string>
+    <string name="person_name_hint">Nome da pessoa</string>
+    <string name="people_empty">Ninguém adicionado ainda — adicione a primeira pessoa acima.</string>
+    <string name="cd_add_person">Adicionar pessoa</string>
+    <string name="cd_remove_person">Remover pessoa</string>
+    <string name="no_items_assigned">Nenhum item atribuído ainda</string>
+    <string name="add_tip">Adicionar gorjeta</string>
+    <string name="tip_percent">%1$d%%</string>
+    <string name="calculate">Calcular</string>
+    <string name="unclaimed_banner">Ainda falta atribuir: %1$s</string>
+    <!-- ex.: "Cerveja (2 restantes)" — item com unidades sem dono -->
+    <string name="unclaimed_item_partial">%1$s (%2$d restantes)</string>
+
+    <!-- contagem de itens · valor gasto, sob o nome de cada pessoa -->
+    <plurals name="claim_summary" tools:ignore="MissingQuantity">
+        <item quantity="one">%1$d item · %2$s</item>
+        <item quantity="other">%1$d itens · %2$s</item>
+    </plurals>
+
+    <!-- Folha de atribuição -->
+    <string name="claim_instructions">Toque num número para entrar naquela unidade — compartilhar uma com alguém divide o custo.</string>
+    <string name="unit_price_each">%1$s cada</string>
+    <string name="done">Concluir</string>
+    <string name="cd_close">Fechar</string>
+
+    <!-- Tela 3: Resultado -->
+    <string name="results_title">Veja a divisão</string>
+    <string name="results_subtitle">%1$s · Total %2$s</string>
+    <string name="tip_share">Parte da gorjeta</string>
+    <string name="result_line_item">%1$s ×%2$d</string>
+    <string name="result_line_item_shared">%1$s ×%2$d (compartilhado)</string>
+    <string name="cd_expand">Expandir</string>
+    <string name="cd_collapse">Recolher</string>
+
+    <plurals name="people_count" tools:ignore="MissingQuantity">
+        <item quantity="one">%1$d pessoa</item>
+        <item quantity="other">%1$d pessoas</item>
+    </plurals>
+
+    <!-- Componentes compartilhados -->
+    <string name="cd_decrease">Diminuir</string>
+    <string name="cd_increase">Aumentar</string>
+</resources>

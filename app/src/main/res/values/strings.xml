@@ -1,0 +1,63 @@
+<resources>
+    <string name="app_name">Bar Tab Split</string>
+
+    <!-- Currency: the symbol prefixed to every money amount. -->
+    <string name="currency_symbol">$</string>
+
+    <!-- Screen 1: Items -->
+    <string name="items_title">Bar Tab</string>
+    <string name="items_subtitle">Add every item from the tab</string>
+    <string name="item_name_hint">Item name</string>
+    <string name="price_hint">0.00</string>
+    <string name="items_empty">No items yet — add the first round above.</string>
+    <string name="subtotal">Subtotal</string>
+    <string name="next">Next</string>
+    <string name="add_item_disabled_hint">Add at least one item to continue</string>
+    <string name="cd_add_item">Add item</string>
+    <string name="cd_remove_item">Remove item</string>
+
+    <!-- Screen 2: People -->
+    <string name="people_title">Who\'s splitting?</string>
+    <string name="people_subtitle">Tap a person to assign their items</string>
+    <string name="person_name_hint">Person\'s name</string>
+    <string name="people_empty">No one added yet — add the first person above.</string>
+    <string name="cd_add_person">Add person</string>
+    <string name="cd_remove_person">Remove person</string>
+    <string name="no_items_assigned">No items assigned yet</string>
+    <string name="add_tip">Add tip</string>
+    <string name="tip_percent">%1$d%%</string>
+    <string name="calculate">Calculate</string>
+    <string name="unclaimed_banner">Still needs claiming: %1$s</string>
+    <!-- e.g. "Beer (2 left)" — an item with some units still unclaimed -->
+    <string name="unclaimed_item_partial">%1$s (%2$d left)</string>
+
+    <!-- item count · money spent, shown under each person's name -->
+    <plurals name="claim_summary">
+        <item quantity="one">%1$d item · %2$s</item>
+        <item quantity="other">%1$d items · %2$s</item>
+    </plurals>
+
+    <!-- Claim sheet -->
+    <string name="claim_instructions">Tap a number to join that unit — sharing one with someone splits its cost.</string>
+    <string name="unit_price_each">%1$s each</string>
+    <string name="done">Done</string>
+    <string name="cd_close">Close</string>
+
+    <!-- Screen 3: Results -->
+    <string name="results_title">Here\'s the split</string>
+    <string name="results_subtitle">%1$s · Total %2$s</string>
+    <string name="tip_share">Tip share</string>
+    <string name="result_line_item">%1$s ×%2$d</string>
+    <string name="result_line_item_shared">%1$s ×%2$d (shared)</string>
+    <string name="cd_expand">Expand</string>
+    <string name="cd_collapse">Collapse</string>
+
+    <plurals name="people_count">
+        <item quantity="one">%1$d person</item>
+        <item quantity="other">%1$d people</item>
+    </plurals>
+
+    <!-- Shared components -->
+    <string name="cd_decrease">Decrease</string>
+    <string name="cd_increase">Increase</string>
+</resources>
