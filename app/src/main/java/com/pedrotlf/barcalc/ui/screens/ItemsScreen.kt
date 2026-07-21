@@ -153,6 +153,10 @@ private fun AddItemCard(state: TabUiState, onAction: (TabAction) -> Unit) {
                         .weight(1f)
                         .padding(horizontal = 4.dp, vertical = 10.dp),
                 )
+                Text(
+                    stringResource(R.string.price_each_suffix),
+                    style = BarTabType.Body.copy(fontSize = 13.sp, color = BarTabColors.Neutral600),
+                )
             }
             QtyStepper(
                 label = "${state.newItemQty}",
