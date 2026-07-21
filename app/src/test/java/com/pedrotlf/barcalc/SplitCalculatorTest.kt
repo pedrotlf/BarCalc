@@ -94,26 +94,55 @@ class SplitCalculatorTest {
     }
 
     @Test
-    fun `even tip splits equally and allocates leftover cents to first people`() {
-        // 100¢ across 3 people -> 34 + 33 + 33 = 100
-        val shares = (0 until 3).map { index ->
-            SplitCalculator.personTipShare(
-                personIndex = index, peopleCount = 3, tipCents = 100L,
-                mode = TipSplitMode.EVEN,
-            )
-        }
+    fun `even tip splits equally and gives leftover cents to first people`() {
+        // 100¢ across 3 equal participants -> 34 + 33 + 33 = 100
+        val shares = SplitCalculator.allocateTip(
+            itemTotals = listOf(500L, 500L, 500L), tipCents = 100L, mode = TipSplitMode.EVEN,
+        )
         assertEquals(listOf(34L, 33L, 33L), shares)
         assertEquals(100L, shares.sum())
     }
 
     @Test
-    fun `proportional tip follows consumption`() {
-        val share = SplitCalculator.personTipShare(
-            personIndex = 0, peopleCount = 2, tipCents = 300L,
-            personItemsCents = 2500L, subtotalCents = 3000L,
-            mode = TipSplitMode.PROPORTIONAL,
+    fun `proportional tip follows each person's share of the tab`() {
+        // Alice's items 2500, Bob's 500 (tab 3000); 300¢ tip.
+        // Alice: 2500/3000*300 = 250, Bob: 500/3000*300 = 50.
+        val shares = SplitCalculator.allocateTip(
+            itemTotals = listOf(2500L, 500L), tipCents = 300L,
         )
-        assertEquals(250L, share)
+        assertEquals(listOf(250L, 50L), shares)
+    }
+
+    @Test
+    fun `proportional tip charges nothing to someone with no items`() {
+        // Bob had no items -> no tip; Alice covers all of it.
+        val shares = SplitCalculator.allocateTip(
+            itemTotals = listOf(1000L, 0L), tipCents = 120L,
+        )
+        assertEquals(listOf(120L, 0L), shares)
+    }
+
+    @Test
+    fun `proportional tip still sums exactly to the tip when it doesn't divide evenly`() {
+        // 100¢ tip over 10/10/10 -> 34/33/33 (largest remainder), sums to 100.
+        val shares = SplitCalculator.allocateTip(
+            itemTotals = listOf(10L, 10L, 10L), tipCents = 100L,
+        )
+        assertEquals(100L, shares.sum())
+        assertEquals(listOf(34L, 33L, 33L), shares)
+    }
+
+    @Test
+    fun `allocateTip returns zeros for zero tip or no people`() {
+        assertEquals(listOf(0L, 0L), SplitCalculator.allocateTip(listOf(500L, 500L), 0L))
+        assertEquals(emptyList<Long>(), SplitCalculator.allocateTip(emptyList(), 300L))
+    }
+
+    @Test
+    fun `proportional tip falls back to even split when nobody has items`() {
+        val shares = SplitCalculator.allocateTip(itemTotals = listOf(0L, 0L), tipCents = 101L)
+        assertEquals(listOf(51L, 50L), shares)
+        assertEquals(101L, shares.sum())
     }
 
     @Test
@@ -176,9 +205,9 @@ class SplitCalculatorTest {
     }
 
     @Test
-    fun `plan happy path - shared beer plus even tip`() {
+    fun `plan happy path - shared beer plus proportional tip`() {
         // 3 beers $10 + nachos $12; Alice takes 2 beers + shares 1 with Bob,
-        // Bob has nachos + the shared beer; 10% tip split evenly.
+        // Bob has nachos + the shared beer; 10% tip split by each person's share.
         val beers = sharedBeers()
         val nachos = TabItem(2, "Nachos", 1200L, 1, listOf(listOf(bob)))
         val items = listOf(beers, nachos)
@@ -193,15 +222,15 @@ class SplitCalculatorTest {
         assertEquals(2500L, aliceItems)
         assertEquals(1700L, bobItems)
 
-        val aliceTip = SplitCalculator.personTipShare(personIndex = 0, peopleCount = 2, tipCents = tip)
-        val bobTip = SplitCalculator.personTipShare(personIndex = 1, peopleCount = 2, tipCents = tip)
-        assertEquals(210L, aliceTip)
-        assertEquals(210L, bobTip)
+        // Tip is proportional: Alice pays tip on her $25, Bob on his $17.
+        val (aliceTip, bobTip) = SplitCalculator.allocateTip(listOf(aliceItems, bobItems), tip)
+        assertEquals(250L, aliceTip)
+        assertEquals(170L, bobTip)
 
         // Everything adds back up to the grand total, exactly.
         assertEquals(subtotal + tip, aliceItems + aliceTip + bobItems + bobTip)
-        assertEquals("$27.10", SplitCalculator.formatMoney(aliceItems + aliceTip, "$"))
-        assertEquals("$19.10", SplitCalculator.formatMoney(bobItems + bobTip, "$"))
+        assertEquals("$27.50", SplitCalculator.formatMoney(aliceItems + aliceTip, "$"))
+        assertEquals("$18.70", SplitCalculator.formatMoney(bobItems + bobTip, "$"))
     }
 
     @Test

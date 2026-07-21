@@ -29,6 +29,8 @@ Highlights:
   to the total (no $9.99-from-$10.00 drift).
 - **Per-unit claiming.** Share one beer out of a round of three without splitting
   the whole line.
+- **Proportional tip.** Each person's tip is based on their own share of the tab,
+  not an even split — someone who only had a $10 item tips on $10.
 - **Persists across restarts.** An in-progress tab is saved and restored.
 - **Localized** in English and Brazilian Portuguese (`pt-BR`), including the
   currency symbol.

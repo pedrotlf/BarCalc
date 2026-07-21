@@ -49,6 +49,9 @@ fun ResultsScreen(state: TabUiState, onAction: (TabAction) -> Unit) {
     val currency = LocalCurrencySymbol.current
     val subtotal = SplitCalculator.subtotal(state.items)
     val tipAmount = SplitCalculator.tipAmount(subtotal, state.tipEnabled, state.tipPercent)
+    // Each person's item total, then the tip allocated across them (proportional).
+    val itemTotals = state.people.map { SplitCalculator.personItemsTotal(state.items, it.id) }
+    val tipShares = SplitCalculator.allocateTip(itemTotals, tipAmount)
     val peopleLabel = pluralStringResource(
         R.plurals.people_count,
         state.people.size,
@@ -82,7 +85,7 @@ fun ResultsScreen(state: TabUiState, onAction: (TabAction) -> Unit) {
             verticalArrangement = Arrangement.spacedBy(BarTabDimens.ListGap),
         ) {
             state.people.forEachIndexed { index, person ->
-                ResultCard(person, index, state, onAction, subtotal, tipAmount)
+                ResultCard(person, index, state, onAction, itemTotals[index], tipShares[index])
             }
         }
     }
@@ -94,18 +97,10 @@ private fun ResultCard(
     index: Int,
     state: TabUiState,
     onAction: (TabAction) -> Unit,
-    subtotalCents: Long,
-    tipCents: Long,
+    itemsTotal: Long,
+    tipShare: Long,
 ) {
     val currency = LocalCurrencySymbol.current
-    val itemsTotal = SplitCalculator.personItemsTotal(state.items, person.id)
-    val tipShare = SplitCalculator.personTipShare(
-        personIndex = index,
-        peopleCount = state.people.size,
-        tipCents = tipCents,
-        personItemsCents = itemsTotal,
-        subtotalCents = subtotalCents,
-    )
     val expanded = person.id in state.expandedResultIds
     val chevronDeg by animateFloatAsState(
         targetValue = if (expanded) 90f else 0f,
