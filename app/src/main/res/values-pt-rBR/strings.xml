@@ -8,7 +8,6 @@
     <string name="items_title">Comanda</string>
     <string name="items_subtitle">Adicione cada item da comanda</string>
     <string name="item_name_hint">Nome do item</string>
-    <string name="price_hint">0,00</string>
     <!-- Sufixo após o campo de preço no card de adicionar item, ex.: "R$ 0,00 cada" -->
     <string name="price_each_suffix">cada</string>
     <string name="items_empty">Nenhum item ainda — adicione a primeira rodada acima.</string>

@@ -5,7 +5,6 @@ import com.pedrotlf.barcalc.domain.TabItem
 import com.pedrotlf.barcalc.domain.TipSplitMode
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertFalse
-import org.junit.Assert.assertNull
 import org.junit.Assert.assertTrue
 import org.junit.Test
 
@@ -243,22 +242,10 @@ class SplitCalculatorTest {
     }
 
     @Test
-    fun `price parsing accepts dot and comma decimals`() {
-        assertEquals(1250L, SplitCalculator.parsePriceCents("12.50"))
-        assertEquals(1250L, SplitCalculator.parsePriceCents("12,5"))
-        assertEquals(1000L, SplitCalculator.parsePriceCents(" 10 "))
-        // sub-cent digits round half-up
-        assertEquals(1235L, SplitCalculator.parsePriceCents("12.345"))
-        assertNull(SplitCalculator.parsePriceCents(""))
-        assertNull(SplitCalculator.parsePriceCents("abc"))
-    }
-
-    @Test
-    fun `price edit formatting strips trailing zeros`() {
-        assertEquals("", SplitCalculator.formatPriceForEdit(0L))
-        assertEquals("10", SplitCalculator.formatPriceForEdit(1000L))
-        assertEquals("12.5", SplitCalculator.formatPriceForEdit(1250L))
-        assertEquals("12.34", SplitCalculator.formatPriceForEdit(1234L))
+    fun `money format with empty symbol is used by the money input field`() {
+        assertEquals("0.00", SplitCalculator.formatMoney(0L, ""))
+        assertEquals("0.10", SplitCalculator.formatMoney(10L, ""))
+        assertEquals("10.50", SplitCalculator.formatMoney(1050L, ""))
     }
 
     @Test

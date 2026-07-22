@@ -53,12 +53,12 @@ class TabViewModel(
     fun onAction(action: TabAction) {
         when (action) {
             is TabAction.NewItemNameChanged -> onNewItemNameChange(action.value)
-            is TabAction.NewItemPriceChanged -> onNewItemPriceChange(action.value)
+            is TabAction.NewItemPriceChanged -> onNewItemPriceChange(action.cents)
             TabAction.IncNewQty -> incNewQty()
             TabAction.DecNewQty -> decNewQty()
             TabAction.AddItem -> addItem()
             is TabAction.ItemNameChanged -> updateItemName(action.id, action.name)
-            is TabAction.ItemPriceChanged -> updateItemPrice(action.id, action.raw)
+            is TabAction.ItemPriceChanged -> updateItemPrice(action.id, action.cents)
             is TabAction.IncItemQty -> incItemQty(action.id)
             is TabAction.DecItemQty -> decItemQty(action.id)
             is TabAction.RemoveItem -> removeItem(action.id)
@@ -97,7 +97,7 @@ class TabViewModel(
 
     fun onNewItemNameChange(value: String) = _uiState.update { it.copy(newItemName = value) }
 
-    fun onNewItemPriceChange(value: String) = _uiState.update { it.copy(newItemPrice = value) }
+    fun onNewItemPriceChange(cents: Long) = _uiState.update { it.copy(newItemPriceCents = cents) }
 
     fun incNewQty() = _uiState.update {
         it.copy(newItemQty = (it.newItemQty + 1).coerceAtMost(TabDefaults.QTY_MAX))
@@ -110,7 +110,7 @@ class TabViewModel(
     fun addItem() {
         val state = _uiState.value
         val name = state.newItemName.trim()
-        val priceCents = SplitCalculator.parsePriceCents(state.newItemPrice) ?: return
+        val priceCents = state.newItemPriceCents
         if (name.isEmpty() || priceCents <= 0L) return
         _uiState.update {
             it.copy(
@@ -120,7 +120,7 @@ class TabViewModel(
                     itemSeq = it.session.itemSeq + 1,
                 ),
                 newItemName = "",
-                newItemPrice = "",
+                newItemPriceCents = 0L,
                 newItemQty = 1,
             )
         }
@@ -129,19 +129,8 @@ class TabViewModel(
     fun updateItemName(id: Int, name: String) =
         updateItems { items -> items.map { if (it.id == id) it.copy(name = name) else it } }
 
-    /** Keeps the raw text as a draft so the field edits naturally ("12." etc.). */
-    fun updateItemPrice(id: Int, raw: String) {
-        val priceCents = SplitCalculator.parsePriceCents(raw) ?: 0L
-        _uiState.update {
-            it.copy(
-                session = it.session.copy(
-                    items = it.session.items.map { item ->
-                        if (item.id == id) item.copy(priceCents = priceCents) else item
-                    },
-                ),
-                priceDrafts = it.priceDrafts + (id to raw),
-            )
-        }
+    fun updateItemPrice(id: Int, cents: Long) = updateItems { items ->
+        items.map { if (it.id == id) it.copy(priceCents = cents) else it }
     }
 
     fun incItemQty(id: Int) = updateItems { items ->
@@ -152,12 +141,7 @@ class TabViewModel(
         items.map { if (it.id == id) it.withQtyDecremented() else it }
     }
 
-    fun removeItem(id: Int) = _uiState.update {
-        it.copy(
-            session = it.session.copy(items = it.session.items.filter { item -> item.id != id }),
-            priceDrafts = it.priceDrafts - id,
-        )
-    }
+    fun removeItem(id: Int) = updateItems { items -> items.filter { it.id != id } }
 
     // ── People screen ──────────────────────────────────────────────────────
 
