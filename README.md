@@ -19,18 +19,20 @@ A three-step wizard:
    sheet**. Each item has one slot per unit; tapping a unit claims it. When two
    people claim the same unit, its price splits between them. Add an optional
    tip.
-3. **Results** — a per-person total with an expandable breakdown of every item
-   and their share of the tip.
+3. **Results** — a per-person total, expandable into a breakdown of each item,
+   their subtotal, and their share of the tip.
 
 Highlights:
 
-- **Exact-cent math.** All money is integer cents; uneven splits allocate the
-  leftover pennies to the earliest claimers, so the shares always sum *exactly*
-  to the total (no $9.99-from-$10.00 drift).
+- **Exact-cent math.** All money is integer cents; uneven splits hand out the
+  leftover pennies by largest remainder, so the shares always sum *exactly* to
+  the total (no $9.99-from-$10.00 drift).
 - **Per-unit claiming.** Share one beer out of a round of three without splitting
-  the whole line.
+  the whole line — or claim the entire round in a single tap.
 - **Proportional tip.** Each person's tip is based on their own share of the tab,
   not an even split — someone who only had a $10 item tips on $10.
+- **POS-style money entry.** Prices accumulate from the right as you type — key
+  `1 0 5 0` and the field reads `10.50` — so amounts are always two decimals.
 - **Persists across restarts.** An in-progress tab is saved and restored.
 - **Localized** in English and Brazilian Portuguese (`pt-BR`), including the
   currency symbol.
