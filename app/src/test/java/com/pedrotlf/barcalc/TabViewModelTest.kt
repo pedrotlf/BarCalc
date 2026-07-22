@@ -17,17 +17,17 @@ class TabViewModelTest {
         vm.goToPeople()
         assertEquals(Screen.ITEMS, vm.uiState.value.screen)
 
-        // Add "Beer" x3 at $10
+        // Add "Beer" x3 at $10.00
         vm.onNewItemNameChange("Beer")
-        vm.onNewItemPriceChange("10")
+        vm.onNewItemPriceChange(1000L)
         vm.incNewQty()
         vm.incNewQty()
         assertTrue(vm.uiState.value.addItemEnabled)
         vm.addItem()
 
-        // Add "Nachos" x1 at $12 (comma decimal accepted)
+        // Add "Nachos" x1 at $12.00
         vm.onNewItemNameChange("Nachos")
-        vm.onNewItemPriceChange("12,00")
+        vm.onNewItemPriceChange(1200L)
         vm.addItem()
 
         val items = vm.uiState.value.items
@@ -36,6 +36,7 @@ class TabViewModelTest {
         assertEquals(1200L, items[1].priceCents)
         // Drafts cleared
         assertEquals("", vm.uiState.value.newItemName)
+        assertEquals(0L, vm.uiState.value.newItemPriceCents)
         assertEquals(1, vm.uiState.value.newItemQty)
 
         vm.goToPeople()
@@ -85,7 +86,7 @@ class TabViewModelTest {
     fun `removing a person clears their claims and closes their sheet`() {
         val vm = TabViewModel()
         vm.onNewItemNameChange("Beer")
-        vm.onNewItemPriceChange("10")
+        vm.onNewItemPriceChange(1000L)
         vm.addItem()
         vm.onNewPersonNameChange("Alice")
         vm.addPerson()

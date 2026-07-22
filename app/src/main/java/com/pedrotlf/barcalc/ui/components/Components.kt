@@ -27,17 +27,28 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.SolidColor
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.text.TextRange
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.input.KeyboardCapitalization
+import androidx.compose.ui.text.input.KeyboardType
+import androidx.compose.ui.text.input.TextFieldValue
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.TextUnit
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.pedrotlf.barcalc.R
+import com.pedrotlf.barcalc.domain.SplitCalculator
 import com.pedrotlf.barcalc.ui.theme.BarTabColors
 import com.pedrotlf.barcalc.ui.theme.BarTabType
 import com.pedrotlf.barcalc.ui.theme.Figtree
+
+/** Longest money entry accepted: up to 9,999,999.99. */
+private const val MAX_MONEY_DIGITS = 9
+
+/** Auto-capitalizes each word — for name-like fields (people, items). */
+val NameCapitalization = KeyboardOptions(capitalization = KeyboardCapitalization.Words)
 
 /**
  * The currency symbol to prefix money amounts with, provided once at the app
@@ -245,6 +256,38 @@ fun BareTextField(
                 innerTextField()
             }
         },
+    )
+}
+
+/**
+ * Money input that accumulates digits into cents, like a POS terminal: the
+ * field always shows two decimals, and typing fills in from the right
+ * (1→0→5→0 reads as 10.50; 1→0 reads as 0.10). Only digits are accepted —
+ * any dots/commas the keyboard or a paste might introduce are stripped — and
+ * the caret stays at the end so entry always appends.
+ *
+ * [cents] is the current value; [onCentsChange] fires with the new value on
+ * every keystroke. The currency symbol is rendered separately by the caller.
+ */
+@Composable
+fun MoneyField(
+    cents: Long,
+    onCentsChange: (Long) -> Unit,
+    modifier: Modifier = Modifier,
+    textStyle: TextStyle = BarTabType.Label,
+) {
+    val text = SplitCalculator.formatMoney(cents, symbol = "")
+    BasicTextField(
+        value = TextFieldValue(text, selection = TextRange(text.length)),
+        onValueChange = { newValue ->
+            val digits = newValue.text.filter(Char::isDigit).take(MAX_MONEY_DIGITS)
+            onCentsChange(digits.toLongOrNull() ?: 0L)
+        },
+        modifier = modifier,
+        textStyle = textStyle,
+        singleLine = true,
+        keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.NumberPassword),
+        cursorBrush = SolidColor(BarTabColors.Accent500),
     )
 }
 

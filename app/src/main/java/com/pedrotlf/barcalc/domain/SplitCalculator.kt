@@ -1,8 +1,5 @@
 package com.pedrotlf.barcalc.domain
 
-import java.math.BigDecimal
-import java.math.RoundingMode
-
 enum class TipSplitMode { EVEN, PROPORTIONAL }
 
 /**
@@ -111,23 +108,9 @@ object SplitCalculator {
     fun personItemsTotal(items: List<TabItem>, personId: Int): Long =
         items.sumOf { personItemCost(it, personId) }
 
-    /** 1234 cents -> "$12.34". */
+    /** 1234 cents -> "$12.34" (pass an empty symbol for a plain "12.34"). */
     fun formatMoney(cents: Long, symbol: String): String =
         "$symbol${cents / 100}.${(cents % 100).toString().padStart(2, '0')}"
-
-    /** "12.50" or "12,50" -> 1250 cents; blank/garbage -> null. Sub-cent digits round half-up. */
-    fun parsePriceCents(raw: String): Long? =
-        raw.trim()
-            .replace(',', '.')
-            .toBigDecimalOrNull()
-            ?.movePointRight(2)
-            ?.setScale(0, RoundingMode.HALF_UP)
-            ?.toLong()
-
-    /** 1250 cents -> "12.5", 1000 -> "10", 0 -> "" — a friendly editable representation. */
-    fun formatPriceForEdit(cents: Long): String =
-        if (cents == 0L) ""
-        else BigDecimal(cents).movePointLeft(2).stripTrailingZeros().toPlainString()
 
     /** "Ana Silva" -> "AS"; single names use the first letter; blank -> "?". */
     fun initialsFor(name: String): String {

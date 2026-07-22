@@ -10,7 +10,6 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.widthIn
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.key
@@ -19,7 +18,6 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
@@ -33,6 +31,8 @@ import com.pedrotlf.barcalc.ui.components.AppIcons
 import com.pedrotlf.barcalc.ui.components.BareTextField
 import com.pedrotlf.barcalc.ui.components.GhostIconButton
 import com.pedrotlf.barcalc.ui.components.LocalCurrencySymbol
+import com.pedrotlf.barcalc.ui.components.MoneyField
+import com.pedrotlf.barcalc.ui.components.NameCapitalization
 import com.pedrotlf.barcalc.ui.components.PillTextField
 import com.pedrotlf.barcalc.ui.components.PrimaryButton
 import com.pedrotlf.barcalc.ui.components.PrimaryIconButton
@@ -92,7 +92,7 @@ fun ItemsScreen(state: TabUiState, onAction: (TabAction) -> Unit) {
             ) {
                 state.items.forEach { item ->
                     key(item.id) {
-                        ItemRow(item, state.priceDrafts[item.id], onAction)
+                        ItemRow(item, onAction)
                     }
                 }
             }
@@ -123,6 +123,7 @@ private fun AddItemCard(state: TabUiState, onAction: (TabAction) -> Unit) {
             value = state.newItemName,
             onValueChange = { onAction(TabAction.NewItemNameChanged(it)) },
             placeholder = stringResource(R.string.item_name_hint),
+            keyboardOptions = NameCapitalization,
             modifier = Modifier.fillMaxWidth(),
         )
         Row(
@@ -144,11 +145,10 @@ private fun AddItemCard(state: TabUiState, onAction: (TabAction) -> Unit) {
                     LocalCurrencySymbol.current,
                     style = BarTabType.Body.copy(fontSize = 15.sp, color = BarTabColors.Neutral700),
                 )
-                BareTextField(
-                    value = state.newItemPrice,
-                    onValueChange = { onAction(TabAction.NewItemPriceChanged(it)) },
-                    placeholder = stringResource(R.string.price_hint),
-                    keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Decimal),
+                MoneyField(
+                    cents = state.newItemPriceCents,
+                    onCentsChange = { onAction(TabAction.NewItemPriceChanged(it)) },
+                    textStyle = BarTabType.Body.copy(fontSize = 15.sp),
                     modifier = Modifier
                         .weight(1f)
                         .padding(horizontal = 4.dp, vertical = 10.dp),
@@ -174,7 +174,7 @@ private fun AddItemCard(state: TabUiState, onAction: (TabAction) -> Unit) {
 }
 
 @Composable
-private fun ItemRow(item: TabItem, priceDraft: String?, onAction: (TabAction) -> Unit) {
+private fun ItemRow(item: TabItem, onAction: (TabAction) -> Unit) {
     val currency = LocalCurrencySymbol.current
     Row(
         Modifier
@@ -190,12 +190,13 @@ private fun ItemRow(item: TabItem, priceDraft: String?, onAction: (TabAction) ->
             value = item.name,
             onValueChange = { onAction(TabAction.ItemNameChanged(item.id, it)) },
             textStyle = BarTabType.RowTitle,
+            keyboardOptions = NameCapitalization,
             modifier = Modifier.weight(1f),
         )
         // Small editable price
         Row(
             Modifier
-                .width(56.dp)
+                .width(64.dp)
                 .clip(RoundedCornerShape(BarTabDimens.RadiusSm))
                 .background(BarTabColors.Bg)
                 .padding(horizontal = 6.dp),
@@ -203,11 +204,10 @@ private fun ItemRow(item: TabItem, priceDraft: String?, onAction: (TabAction) ->
             horizontalArrangement = Arrangement.spacedBy(1.dp),
         ) {
             Text(currency, style = BarTabType.Caption)
-            BareTextField(
-                value = priceDraft ?: SplitCalculator.formatPriceForEdit(item.priceCents),
-                onValueChange = { onAction(TabAction.ItemPriceChanged(item.id, it)) },
+            MoneyField(
+                cents = item.priceCents,
+                onCentsChange = { onAction(TabAction.ItemPriceChanged(item.id, it)) },
                 textStyle = BarTabType.Caption.copy(color = BarTabColors.Neutral700),
-                keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Decimal),
                 modifier = Modifier
                     .weight(1f)
                     .padding(vertical = 6.dp),

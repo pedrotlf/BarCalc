@@ -1,7 +1,6 @@
 package com.pedrotlf.barcalc.ui
 
 import com.pedrotlf.barcalc.domain.Person
-import com.pedrotlf.barcalc.domain.SplitCalculator
 import com.pedrotlf.barcalc.domain.TabItem
 import kotlinx.serialization.Serializable
 
@@ -28,11 +27,9 @@ data class TabSession(
 data class TabUiState(
     val session: TabSession = TabSession(),
     val newItemName: String = "",
-    val newItemPrice: String = "",
+    val newItemPriceCents: Long = 0L,
     val newItemQty: Int = 1,
     val newPersonName: String = "",
-    /** Raw text of in-progress price edits per item row, keyed by item id. */
-    val priceDrafts: Map<Int, String> = emptyMap(),
     val activePersonId: Int? = null,
     val expandedResultIds: Set<Int> = emptySet(),
 ) {
@@ -49,8 +46,7 @@ data class TabUiState(
     val activePerson: Person? get() = people.getOrNull(activePersonIndex)
 
     val addItemEnabled: Boolean
-        get() = newItemName.isNotBlank() &&
-            (SplitCalculator.parsePriceCents(newItemPrice) ?: 0L) > 0L
+        get() = newItemName.isNotBlank() && newItemPriceCents > 0L
 
     val addPersonEnabled: Boolean get() = newPersonName.isNotBlank()
 }

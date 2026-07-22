@@ -32,6 +32,7 @@ import com.pedrotlf.barcalc.ui.components.AppIcons
 import com.pedrotlf.barcalc.ui.components.Avatar
 import com.pedrotlf.barcalc.ui.components.GhostIconButton
 import com.pedrotlf.barcalc.ui.components.LocalCurrencySymbol
+import com.pedrotlf.barcalc.ui.components.NameCapitalization
 import com.pedrotlf.barcalc.ui.components.PillTextField
 import com.pedrotlf.barcalc.ui.components.PrimaryButton
 import com.pedrotlf.barcalc.ui.components.PrimaryIconButton
@@ -120,6 +121,7 @@ private fun AddPersonCard(state: TabUiState, onAction: (TabAction) -> Unit) {
             value = state.newPersonName,
             onValueChange = { onAction(TabAction.NewPersonNameChanged(it)) },
             placeholder = stringResource(R.string.person_name_hint),
+            keyboardOptions = NameCapitalization,
             modifier = Modifier.weight(1f),
         )
         PrimaryIconButton(

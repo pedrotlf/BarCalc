@@ -8,7 +8,6 @@
     <string name="items_title">Bar Tab</string>
     <string name="items_subtitle">Add every item from the tab</string>
     <string name="item_name_hint">Item name</string>
-    <string name="price_hint">0.00</string>
     <!-- Suffix after the price input in the add-item card, e.g. "$ 0.00 each" -->
     <string name="price_each_suffix">each</string>
     <string name="items_empty">No items yet — add the first round above.</string>

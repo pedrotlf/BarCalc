@@ -9,12 +9,12 @@ sealed interface TabAction {
 
     // ── Items screen ───────────────────────────────────────────────────────
     data class NewItemNameChanged(val value: String) : TabAction
-    data class NewItemPriceChanged(val value: String) : TabAction
+    data class NewItemPriceChanged(val cents: Long) : TabAction
     data object IncNewQty : TabAction
     data object DecNewQty : TabAction
     data object AddItem : TabAction
     data class ItemNameChanged(val id: Int, val name: String) : TabAction
-    data class ItemPriceChanged(val id: Int, val raw: String) : TabAction
+    data class ItemPriceChanged(val id: Int, val cents: Long) : TabAction
     data class IncItemQty(val id: Int) : TabAction
     data class DecItemQty(val id: Int) : TabAction
     data class RemoveItem(val id: Int) : TabAction
