@@ -12,10 +12,20 @@
 #   public *;
 #}
 
-# Uncomment this to preserve the line number information for
-# debugging stack traces.
-#-keepattributes SourceFile,LineNumberTable
+# Keep line numbers and hide original source file names so Play Console crash
+# reports deobfuscate cleanly against the uploaded mapping.txt.
+-keepattributes SourceFile,LineNumberTable
+-renamesourcefileattribute SourceFile
 
-# If you keep the line number information, uncomment this to
-# hide the original source file name.
-#-renamesourcefileattribute SourceFile
+# ── kotlinx.serialization ─────────────────────────────────────────────────────
+# The runtime ships consumer rules, but we keep our own @Serializable models and
+# their generated serializers explicitly: a stripped serializer would silently
+# break session persistence (Person, TabItem, TabUiState under this package).
+-keepattributes RuntimeVisibleAnnotations,AnnotationDefault
+-keep,includedescriptorclasses class com.pedrotlf.barcalc.**$$serializer { *; }
+-keepclassmembers class com.pedrotlf.barcalc.** {
+    *** Companion;
+}
+-keepclasseswithmembers class com.pedrotlf.barcalc.** {
+    kotlinx.serialization.KSerializer serializer(...);
+}

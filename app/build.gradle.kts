@@ -58,7 +58,10 @@ android {
             // Signs with the upload key when keystore.properties is present;
             // null (unsigned) otherwise.
             signingConfig = signingConfigs.findByName("release")
-            isMinifyEnabled = false
+            // R8 shrinks/obfuscates the code; resource shrinking drops unused
+            // resources (needs minify on). Keep rules live in proguard-rules.pro.
+            isMinifyEnabled = true
+            isShrinkResources = true
             proguardFiles(
                 getDefaultProguardFile("proguard-android-optimize.txt"),
                 "proguard-rules.pro"
