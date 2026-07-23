@@ -10,8 +10,12 @@ import androidx.compose.animation.scaleIn
 import androidx.compose.animation.slideInVertically
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.WindowInsets
+import androidx.compose.foundation.layout.displayCutout
 import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.safeDrawingPadding
+import androidx.compose.foundation.layout.systemBars
+import androidx.compose.foundation.layout.union
+import androidx.compose.foundation.layout.windowInsetsPadding
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.collectAsState
@@ -52,7 +56,8 @@ fun BarTabApp(vm: TabViewModel? = null) {
             Modifier
                 .fillMaxSize()
                 .background(BarTabColors.Bg)
-                .safeDrawingPadding(),
+                // Everything except the IME — the scaffold handles the keyboard itself.
+                .windowInsetsPadding(WindowInsets.systemBars.union(WindowInsets.displayCutout)),
         ) {
             Crossfade(targetState = state.screen, animationSpec = tween(180), label = "screen") { screen ->
                 when (screen) {
