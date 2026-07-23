@@ -110,5 +110,6 @@ adb shell cmd locale set-app-locales com.pedrotlf.barcalc --user 0 --locales pt-
   coding agent. The design tokens are ported into
   [`ui/theme/`](app/src/main/java/com/pedrotlf/barcalc/ui/theme).
 
-No open-source license has been chosen for the application code itself yet — if
-you'd like others to reuse it, add a `LICENSE` file (e.g. MIT or Apache-2.0).
+The application code is **all rights reserved**. It's published here to read and
+learn from, not to reuse — no open-source license is granted for it (the bundled
+fonts keep their own licenses, noted above).
