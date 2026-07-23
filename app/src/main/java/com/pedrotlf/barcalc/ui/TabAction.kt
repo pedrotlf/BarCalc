@@ -39,4 +39,8 @@ sealed interface TabAction {
     // ── Results screen ─────────────────────────────────────────────────────
     data class ToggleExpand(val personId: Int) : TabAction
     data object Reset : TabAction
+
+    // ── About ──────────────────────────────────────────────────────────────
+    data object ShowAbout : TabAction
+    data object HideAbout : TabAction
 }

@@ -4,6 +4,8 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.ColumnScope
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.RowScope
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
@@ -11,6 +13,7 @@ import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
@@ -19,19 +22,32 @@ import com.pedrotlf.barcalc.ui.theme.BarTabColors
 import com.pedrotlf.barcalc.ui.theme.BarTabDimens
 import com.pedrotlf.barcalc.ui.theme.BarTabType
 
-/** Title + subtitle block at the top of every screen. */
+/**
+ * Title + subtitle block at the top of every screen, with an optional
+ * trailing [action] (e.g. an info button) pinned to the top-right.
+ */
 @Composable
-fun ScreenHeader(title: String, subtitle: String) {
-    Column(
-        Modifier.padding(
-            start = BarTabDimens.ScreenHPadding,
-            top = 24.dp,
-            end = BarTabDimens.ScreenHPadding,
-            bottom = 4.dp,
-        )
+fun ScreenHeader(
+    title: String,
+    subtitle: String,
+    action: (@Composable RowScope.() -> Unit)? = null,
+) {
+    Row(
+        Modifier
+            .fillMaxWidth()
+            .padding(
+                start = BarTabDimens.ScreenHPadding,
+                top = 24.dp,
+                end = BarTabDimens.ScreenHPadding,
+                bottom = 4.dp,
+            ),
+        verticalAlignment = Alignment.Top,
     ) {
-        Text(title, style = BarTabType.ScreenTitle)
-        Text(subtitle, style = BarTabType.ScreenSubtitle, modifier = Modifier.padding(top = 4.dp))
+        Column(Modifier.weight(1f)) {
+            Text(title, style = BarTabType.ScreenTitle)
+            Text(subtitle, style = BarTabType.ScreenSubtitle, modifier = Modifier.padding(top = 4.dp))
+        }
+        action?.invoke(this)
     }
 }
 

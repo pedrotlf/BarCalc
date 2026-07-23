@@ -32,6 +32,7 @@ data class TabUiState(
     val newPersonName: String = "",
     val activePersonId: Int? = null,
     val expandedResultIds: Set<Int> = emptySet(),
+    val showAbout: Boolean = false,
 ) {
     val items: List<TabItem> get() = session.items
     val people: List<Person> get() = session.people
