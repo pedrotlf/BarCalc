@@ -67,4 +67,13 @@ object AppIcons {
             "M12 17 L12.01 17",
         )
     }
+
+    val Help: ImageVector by lazy {
+        strokeIcon(
+            "Help",
+            "M12 2 a10 10 0 1 0 0 20 a10 10 0 1 0 0 -20",
+            "M9.09 9 a3 3 0 0 1 5.83 1 c0 2 -3 3 -3 3",
+            "M12 17 L12.01 17",
+        )
+    }
 }

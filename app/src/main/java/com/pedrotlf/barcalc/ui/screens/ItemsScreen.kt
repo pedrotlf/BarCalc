@@ -78,7 +78,19 @@ fun ItemsScreen(state: TabUiState, onAction: (TabAction) -> Unit) {
             }
         },
     ) {
-        ScreenHeader(stringResource(R.string.items_title), stringResource(R.string.items_subtitle))
+        ScreenHeader(
+            stringResource(R.string.items_title),
+            stringResource(R.string.items_subtitle),
+        ) {
+            GhostIconButton(
+                icon = AppIcons.Help,
+                contentDescription = stringResource(R.string.cd_about),
+                onClick = { onAction(TabAction.ShowAbout) },
+                size = 44.dp,
+                iconSize = 24.dp,
+                tint = BarTabColors.Neutral600,
+            )
+        }
         AddItemCard(state, onAction)
         if (state.items.isNotEmpty()) {
             Column(

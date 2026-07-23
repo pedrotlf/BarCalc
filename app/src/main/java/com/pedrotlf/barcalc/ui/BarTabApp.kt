@@ -23,6 +23,7 @@ import androidx.lifecycle.viewmodel.compose.viewModel
 import com.pedrotlf.barcalc.R
 import com.pedrotlf.barcalc.data.SessionRepository
 import com.pedrotlf.barcalc.ui.components.LocalCurrencySymbol
+import com.pedrotlf.barcalc.ui.screens.AboutSheet
 import com.pedrotlf.barcalc.ui.screens.ClaimSheet
 import com.pedrotlf.barcalc.ui.screens.ItemsScreen
 import com.pedrotlf.barcalc.ui.screens.PeopleScreen
@@ -38,7 +39,9 @@ fun BarTabApp(vm: TabViewModel? = null) {
     val state by vm.uiState.collectAsState()
     val onAction = vm::onAction
 
-    BackHandler(enabled = state.screen != Screen.ITEMS || state.activePersonId != null) {
+    BackHandler(
+        enabled = state.screen != Screen.ITEMS || state.activePersonId != null || state.showAbout,
+    ) {
         onAction(TabAction.Back)
     }
 
@@ -70,6 +73,16 @@ fun BarTabApp(vm: TabViewModel? = null) {
                 if (activePerson != null) {
                     ClaimSheet(activePerson, state.activePersonIndex, state, onAction)
                 }
+            }
+
+            AnimatedVisibility(
+                visible = state.showAbout,
+                enter = fadeIn(tween(160)) +
+                    slideInVertically(tween(160)) { it / 40 } +
+                    scaleIn(tween(160), initialScale = 0.97f),
+                exit = fadeOut(tween(120)),
+            ) {
+                AboutSheet(onAction)
             }
         }
     }

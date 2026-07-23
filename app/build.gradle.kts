@@ -16,6 +16,12 @@ android {
         applicationId = "com.pedrotlf.barcalc"
         minSdk = 28
         targetSdk = 36
+
+        // ── Release versioning ────────────────────────────────────────────
+        // Bump BOTH for every Play Store release:
+        //   • versionCode — the integer Play orders builds by. Must strictly
+        //     increase (+1) on every upload and never repeat.
+        //   • versionName — the label users see (e.g. "1.1", "2.0").
         versionCode = 1
         versionName = "1.0"
 
@@ -37,6 +43,8 @@ android {
     }
     buildFeatures {
         compose = true
+        // Generates BuildConfig with VERSION_NAME/VERSION_CODE for the About screen.
+        buildConfig = true
     }
 }
 
