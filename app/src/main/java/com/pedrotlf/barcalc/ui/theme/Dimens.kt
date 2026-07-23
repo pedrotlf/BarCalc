@@ -25,4 +25,14 @@ object BarTabDimens {
 
     /** Person/result cards (design: radius-lg * 1.15). */
     val RadiusXl = 32.dp
+
+    /**
+     * Centered modal sheets (claim / about) take this share of the screen
+     * width, so they scale with the device — near-full in phone portrait, and
+     * proportionally wider in landscape instead of staying narrow.
+     */
+    const val SheetWidthFraction = 0.85f
+
+    /** …but never exceed this, so text stays readable on large tablets. */
+    val SheetMaxWidth = 720.dp
 }
