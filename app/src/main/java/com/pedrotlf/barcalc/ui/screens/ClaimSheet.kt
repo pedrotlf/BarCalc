@@ -157,55 +157,64 @@ private fun SheetHeader(person: Person, personIndex: Int, onAction: (TabAction) 
 @Composable
 private fun ClaimRow(item: TabItem, person: Person, onAction: (TabAction) -> Unit) {
     val currency = LocalCurrencySymbol.current
-    Row(
+    BoxWithConstraints(
         Modifier
             .fillMaxWidth()
             .bottomBorder(BarTabColors.Accent100)
             .padding(vertical = 10.dp),
-        verticalAlignment = Alignment.CenterVertically,
-        horizontalArrangement = Arrangement.spacedBy(BarTabDimens.ListGap),
     ) {
-        Column(Modifier.weight(1f)) {
-            Text(item.name, style = BarTabType.RowTitle)
-            Text(
-                stringResource(
-                    R.string.unit_price_each,
-                    SplitCalculator.formatMoney(item.priceCents, currency),
-                ),
-                style = BarTabType.Caption,
-            )
-        }
-        if (item.qty == 1) {
-            Checkbox(
-                checked = person.id in item.units[0],
-                onCheckedChange = {
-                    onAction(TabAction.ToggleUnitClaim(item.id, 0, person.id))
-                },
-                colors = accentCheckboxColors(),
-            )
-        } else {
-            val allClaimed = item.allUnitsClaimedBy(person.id)
-            FlowRow(
-                horizontalArrangement = Arrangement.spacedBy(6.dp, Alignment.End),
-                verticalArrangement = Arrangement.spacedBy(6.dp),
-                modifier = Modifier.widthIn(max = 160.dp),
-            ) {
-                // One tap to claim (or release) every unit at once.
-                AllChip(
-                    active = allClaimed,
-                    onClick = {
-                        onAction(TabAction.SetAllUnitsClaim(item.id, person.id, !allClaimed))
-                    },
+        // Name/price takes only what it needs, up to half the row; the claim
+        // controls fill whatever is left over (so they get more when names are short).
+        val nameMaxWidth = maxWidth / 2
+        Row(
+            Modifier.fillMaxWidth(),
+            verticalAlignment = Alignment.CenterVertically,
+            horizontalArrangement = Arrangement.spacedBy(BarTabDimens.ListGap),
+        ) {
+            Column(Modifier.widthIn(max = nameMaxWidth)) {
+                Text(item.name, style = BarTabType.RowTitle)
+                Text(
+                    stringResource(
+                        R.string.unit_price_each,
+                        SplitCalculator.formatMoney(item.priceCents, currency),
+                    ),
+                    style = BarTabType.Caption,
                 )
-                item.units.forEachIndexed { unitIndex, unit ->
-                    UnitChip(
-                        index = unitIndex + 1,
-                        active = person.id in unit,
-                        totalCount = unit.size,
+            }
+            if (item.qty == 1) {
+                Box(Modifier.weight(1f), contentAlignment = Alignment.CenterEnd) {
+                    Checkbox(
+                        checked = person.id in item.units[0],
+                        onCheckedChange = {
+                            onAction(TabAction.ToggleUnitClaim(item.id, 0, person.id))
+                        },
+                        colors = accentCheckboxColors(),
+                    )
+                }
+            } else {
+                val allClaimed = item.allUnitsClaimedBy(person.id)
+                FlowRow(
+                    modifier = Modifier.weight(1f),
+                    horizontalArrangement = Arrangement.spacedBy(6.dp, Alignment.End),
+                    verticalArrangement = Arrangement.spacedBy(6.dp),
+                ) {
+                    // One tap to claim (or release) every unit at once.
+                    AllChip(
+                        active = allClaimed,
                         onClick = {
-                            onAction(TabAction.ToggleUnitClaim(item.id, unitIndex, person.id))
+                            onAction(TabAction.SetAllUnitsClaim(item.id, person.id, !allClaimed))
                         },
                     )
+                    item.units.forEachIndexed { unitIndex, unit ->
+                        UnitChip(
+                            index = unitIndex + 1,
+                            active = person.id in unit,
+                            totalCount = unit.size,
+                            onClick = {
+                                onAction(TabAction.ToggleUnitClaim(item.id, unitIndex, person.id))
+                            },
+                        )
+                    }
                 }
             }
         }
@@ -265,7 +274,7 @@ private fun UnitChip(index: Int, active: Boolean, totalCount: Int, onClick: () -
                 ),
             )
         }
-        if (totalCount > 1) {
+        if (totalCount > 0) {
             Box(
                 Modifier
                     .align(Alignment.TopEnd)

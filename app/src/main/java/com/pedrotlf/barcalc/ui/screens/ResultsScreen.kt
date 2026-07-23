@@ -6,11 +6,13 @@ import androidx.compose.animation.core.tween
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.BoxWithConstraints
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.widthIn
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Icon
 import androidx.compose.material3.Text
@@ -23,6 +25,7 @@ import androidx.compose.ui.draw.rotate
 import androidx.compose.ui.res.pluralStringResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -197,17 +200,26 @@ private fun ResultCard(
 
 @Composable
 private fun BreakdownLine(label: String, amount: String, emphasized: Boolean = false) {
-    Row(
-        Modifier.fillMaxWidth(),
-        horizontalArrangement = Arrangement.SpaceBetween,
-    ) {
-        val style = if (emphasized) {
-            BarTabType.Money
-        } else {
-            BarTabType.Body.copy(fontSize = 13.sp, color = BarTabColors.Neutral700)
+    val style = if (emphasized) {
+        BarTabType.Money
+    } else {
+        BarTabType.Body.copy(fontSize = 13.sp, color = BarTabColors.Neutral700)
+    }
+    BoxWithConstraints(Modifier.fillMaxWidth()) {
+        // Label takes only what it needs, up to half; the amount fills the rest.
+        val labelMaxWidth = maxWidth / 2
+        Row(
+            Modifier.fillMaxWidth(),
+            horizontalArrangement = Arrangement.spacedBy(8.dp),
+        ) {
+            Text(label, style = style, modifier = Modifier.widthIn(max = labelMaxWidth))
+            Text(
+                amount,
+                style = style,
+                textAlign = TextAlign.End,
+                modifier = Modifier.weight(1f),
+            )
         }
-        Text(label, style = style)
-        Text(amount, style = style)
     }
 }
 

@@ -2,12 +2,12 @@ package com.pedrotlf.barcalc.ui.screens
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.defaultMinSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.widthIn
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Text
@@ -15,6 +15,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.key
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
@@ -205,25 +206,36 @@ private fun ItemRow(item: TabItem, onAction: (TabAction) -> Unit) {
             keyboardOptions = NameCapitalization,
             modifier = Modifier.weight(1f),
         )
-        // Small editable price
+        // Editable price — the box grows with the amount so large values aren't hidden.
+        val priceStyle = BarTabType.Caption.copy(color = BarTabColors.Neutral700)
         Row(
             Modifier
-                .width(64.dp)
                 .clip(RoundedCornerShape(BarTabDimens.RadiusSm))
                 .background(BarTabColors.Bg)
-                .padding(horizontal = 6.dp),
+                .padding(horizontal = 6.dp, vertical = 6.dp),
             verticalAlignment = Alignment.CenterVertically,
             horizontalArrangement = Arrangement.spacedBy(1.dp),
         ) {
             Text(currency, style = BarTabType.Caption)
-            MoneyField(
-                cents = item.priceCents,
-                onCentsChange = { onAction(TabAction.ItemPriceChanged(item.id, it)) },
-                textStyle = BarTabType.Caption.copy(color = BarTabColors.Neutral700),
-                modifier = Modifier
-                    .weight(1f)
-                    .padding(vertical = 6.dp),
-            )
+            Box(contentAlignment = Alignment.CenterStart) {
+                // Invisible sizer gives the field exactly the width of its text.
+                Text(
+                    SplitCalculator.formatMoney(item.priceCents, symbol = ""),
+                    style = priceStyle,
+                    maxLines = 1,
+                    softWrap = false,
+                    modifier = Modifier
+                        .widthIn(min = 26.dp)
+                        .padding(end = 2.dp) // caret room so the first digit never clips
+                        .alpha(0f),
+                )
+                MoneyField(
+                    cents = item.priceCents,
+                    onCentsChange = { onAction(TabAction.ItemPriceChanged(item.id, it)) },
+                    textStyle = priceStyle,
+                    modifier = Modifier.matchParentSize(),
+                )
+            }
         }
         QtyStepper(
             label = "${item.qty}",
