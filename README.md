@@ -5,9 +5,9 @@ individual units of a shared round — down to the exact cent. Built with Jetpac
 Compose.
 
 <p align="center">
-  <img src="docs/screenshots/01-items.png" width="30%" alt="Items screen" />
-  <img src="docs/screenshots/02-claim-sheet.png" width="30%" alt="Per-unit claim sheet" />
-  <img src="docs/screenshots/03-results.png" width="30%" alt="Results breakdown" />
+  <img src="docs/screenshots/phone/01-items.png" width="30%" alt="Items screen" />
+  <img src="docs/screenshots/phone/02-claim-sheet.png" width="30%" alt="Per-unit claim sheet" />
+  <img src="docs/screenshots/phone/03-results.png" width="30%" alt="Results breakdown" />
 </p>
 
 ## What it does
