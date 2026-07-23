@@ -12,7 +12,7 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.widthIn
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
@@ -58,14 +58,15 @@ fun AboutSheet(onAction: (TabAction) -> Unit) {
                 interactionSource = remember { MutableInteractionSource() },
                 indication = null,
             ) { onAction(TabAction.HideAbout) }
-            .padding(24.dp),
+            .padding(vertical = 24.dp),
         contentAlignment = Alignment.Center,
     ) {
         val sheetMaxHeight = maxHeight * 0.9f
+        val sheetWidth = (maxWidth * BarTabDimens.SheetWidthFraction)
+            .coerceAtMost(BarTabDimens.SheetMaxWidth)
         Column(
             Modifier
-                .widthIn(max = 340.dp)
-                .fillMaxWidth()
+                .width(sheetWidth)
                 .heightIn(max = sheetMaxHeight)
                 .shadow(24.dp, RoundedCornerShape(BarTabDimens.RadiusLg))
                 .clip(RoundedCornerShape(BarTabDimens.RadiusLg))
