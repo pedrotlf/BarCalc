@@ -73,7 +73,7 @@
     <string name="close">Close</string>
     <string name="about_description">BarCalc helps a group divide a bar tab fairly — item by item, down to the exact cent. Add each item, add who\'s splitting, then tap to claim what each person had; sharing a unit splits its cost between them. Add a tip and everyone gets their own exact total, with the tip shared in proportion to what they ordered.</string>
     <string name="about_privacy">Everything stays on your device — no account, no ads, no tracking, no internet.</string>
-    <string name="about_developer">Designed and directed by Pedro Henrique Flores, and built with Claude Code — Anthropic\'s AI coding agent.</string>
+    <string name="about_developer">Designed and directed by Pedro Henrique Flores. Its visual design was elaborated with Claude Design, and the app was built with Claude Code — Anthropic\'s AI coding agent.</string>
     <string name="about_open_source">This app is open source — view the code on GitHub:</string>
     <string name="about_report_issue">Report an issue</string>
     <string name="about_licenses_heading">Open-source licenses</string>

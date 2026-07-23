@@ -73,7 +73,7 @@
     <string name="close">Fechar</string>
     <string name="about_description">O BarCalc ajuda um grupo a dividir a conta do bar de forma justa — item por item, até o último centavo. Adicione cada item, adicione quem vai dividir e toque para atribuir o que cada um consumiu; compartilhar uma unidade divide o custo entre eles. Adicione a gorjeta e cada um recebe seu próprio total exato, com a gorjeta dividida na proporção do que pediu.</string>
     <string name="about_privacy">Tudo fica no seu dispositivo — sem cadastro, sem anúncios, sem rastreamento, sem internet.</string>
-    <string name="about_developer">Concebido e dirigido por Pedro Henrique Flores, e construído com o Claude Code — o agente de programação por IA da Anthropic.</string>
+    <string name="about_developer">Concebido e dirigido por Pedro Henrique Flores. Seu design visual foi elaborado com o Claude Design, e o app foi construído com o Claude Code — o agente de programação por IA da Anthropic.</string>
     <string name="about_open_source">Este app é de código aberto — veja o código no GitHub:</string>
     <string name="about_report_issue">Relatar um problema</string>
     <string name="about_licenses_heading">Licenças de código aberto</string>

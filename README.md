@@ -1,4 +1,4 @@
-# Bar Tab Split
+# BarCalc
 
 A small, native Android app for splitting a bar tab **item by item** — including
 individual units of a shared round — down to the exact cent. Built with Jetpack
@@ -40,6 +40,7 @@ Highlights:
 ## Tech stack
 
 - **UI:** Jetpack Compose + Material 3, custom theme ported from a design system
+  built in [Claude Design](https://claude.ai/design)
 - **Architecture:** MVVM with unidirectional data flow — a single `TabViewModel`
   exposes immutable `TabUiState` via `StateFlow`; the UI sends `sealed TabAction`
   events through one `onAction` entry point, so screens are pure and previewable
@@ -102,8 +103,11 @@ adb shell cmd locale set-app-locales com.pedrotlf.barcalc --user 0 --locales pt-
   [`licenses/`](licenses/):
   - **Caprasimo** — © 2023 The Caprasimo Project Authors
   - **Figtree** — © 2022 The Figtree Project Authors
-- The UI was implemented from a design prototype; its "Organic" design-system
-  tokens (colors, spacing, radii, type scale) are ported into
+- **Design & build.** BarCalc's visual design — layouts, the "Organic"
+  design-system tokens (colors, spacing, radii, type scale), and the launcher
+  icon — was elaborated in [Claude Design](https://claude.ai/design), and the app
+  was built with [Claude Code](https://claude.com/claude-code), Anthropic's AI
+  coding agent. The design tokens are ported into
   [`ui/theme/`](app/src/main/java/com/pedrotlf/barcalc/ui/theme).
 
 No open-source license has been chosen for the application code itself yet — if
