@@ -65,7 +65,7 @@ fun ResultsScreen(state: TabUiState, onAction: (TabAction) -> Unit) {
         footer = {
             PrimaryButton(
                 text = stringResource(R.string.done),
-                onClick = { onAction(TabAction.Reset) },
+                onClick = { onAction(TabAction.RequestReset) },
                 modifier = Modifier.fillMaxWidth(),
             )
         },

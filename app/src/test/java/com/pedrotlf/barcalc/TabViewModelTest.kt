@@ -1,6 +1,7 @@
 package com.pedrotlf.barcalc
 
 import com.pedrotlf.barcalc.ui.Screen
+import com.pedrotlf.barcalc.ui.TabAction
 import com.pedrotlf.barcalc.ui.TabViewModel
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertFalse
@@ -100,6 +101,35 @@ class TabViewModelTest {
         assertTrue(vm.uiState.value.people.isEmpty())
         assertTrue(vm.uiState.value.items.single().units.all { it.isEmpty() })
         assertEquals(null, vm.uiState.value.activePersonId)
+    }
+
+    @Test
+    fun `reset is confirmed before it wipes the tab`() {
+        val vm = TabViewModel()
+        vm.onNewItemNameChange("Beer")
+        vm.onNewItemPriceChange(1000L)
+        vm.addItem()
+
+        // Requesting reset only opens the confirmation — data stays intact.
+        vm.onAction(TabAction.RequestReset)
+        assertTrue(vm.uiState.value.showResetConfirm)
+        assertTrue(vm.uiState.value.items.isNotEmpty())
+
+        // Dismissing (or system back) closes it without wiping.
+        vm.onAction(TabAction.DismissReset)
+        assertFalse(vm.uiState.value.showResetConfirm)
+        assertTrue(vm.uiState.value.items.isNotEmpty())
+
+        vm.onAction(TabAction.RequestReset)
+        assertTrue(vm.goBack())
+        assertFalse(vm.uiState.value.showResetConfirm)
+        assertTrue(vm.uiState.value.items.isNotEmpty())
+
+        // Only a confirmed reset clears the tab.
+        vm.onAction(TabAction.RequestReset)
+        vm.onAction(TabAction.Reset)
+        assertFalse(vm.uiState.value.showResetConfirm)
+        assertTrue(vm.uiState.value.items.isEmpty())
     }
 
     @Test

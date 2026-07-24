@@ -31,6 +31,7 @@ import com.pedrotlf.barcalc.ui.screens.AboutSheet
 import com.pedrotlf.barcalc.ui.screens.ClaimSheet
 import com.pedrotlf.barcalc.ui.screens.ItemsScreen
 import com.pedrotlf.barcalc.ui.screens.PeopleScreen
+import com.pedrotlf.barcalc.ui.screens.ResetConfirmDialog
 import com.pedrotlf.barcalc.ui.screens.ResultsScreen
 import com.pedrotlf.barcalc.ui.theme.BarTabColors
 
@@ -44,7 +45,10 @@ fun BarTabApp(vm: TabViewModel? = null) {
     val onAction = vm::onAction
 
     BackHandler(
-        enabled = state.screen != Screen.ITEMS || state.activePersonId != null || state.showAbout,
+        enabled = state.screen != Screen.ITEMS ||
+            state.activePersonId != null ||
+            state.showAbout ||
+            state.showResetConfirm,
     ) {
         onAction(TabAction.Back)
     }
@@ -88,6 +92,16 @@ fun BarTabApp(vm: TabViewModel? = null) {
                 exit = fadeOut(tween(120)),
             ) {
                 AboutSheet(onAction)
+            }
+
+            AnimatedVisibility(
+                visible = state.showResetConfirm,
+                enter = fadeIn(tween(160)) +
+                    slideInVertically(tween(160)) { it / 40 } +
+                    scaleIn(tween(160), initialScale = 0.97f),
+                exit = fadeOut(tween(120)),
+            ) {
+                ResetConfirmDialog(onAction)
             }
         }
     }

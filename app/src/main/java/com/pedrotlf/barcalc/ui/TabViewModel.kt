@@ -81,6 +81,8 @@ class TabViewModel(
             TabAction.Back -> goBack()
 
             is TabAction.ToggleExpand -> toggleExpand(action.personId)
+            TabAction.RequestReset -> _uiState.update { it.copy(showResetConfirm = true) }
+            TabAction.DismissReset -> _uiState.update { it.copy(showResetConfirm = false) }
             TabAction.Reset -> reset()
 
             TabAction.ShowAbout -> _uiState.update { it.copy(showAbout = true) }
@@ -220,6 +222,7 @@ class TabViewModel(
         val state = _uiState.value
         return when {
             state.showAbout -> { _uiState.update { it.copy(showAbout = false) }; true }
+            state.showResetConfirm -> { _uiState.update { it.copy(showResetConfirm = false) }; true }
             state.activePersonId != null -> { closeSheet(); true }
             state.screen == Screen.RESULTS -> { updateSession { it.copy(screen = Screen.PEOPLE) }; true }
             state.screen == Screen.PEOPLE -> { updateSession { it.copy(screen = Screen.ITEMS) }; true }
