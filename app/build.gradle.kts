@@ -37,8 +37,8 @@ android {
         //   • versionCode — the integer Play orders builds by. Must strictly
         //     increase (+1) on every upload and never repeat.
         //   • versionName — the label users see (e.g. "1.1", "2.0").
-        versionCode = 1
-        versionName = "1.0"
+        versionCode = 2
+        versionName = "1.1"
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
     }
