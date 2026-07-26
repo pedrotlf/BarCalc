@@ -26,11 +26,17 @@ import androidx.compose.ui.res.stringResource
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.pedrotlf.barcalc.R
 import com.pedrotlf.barcalc.data.SessionRepository
+import com.pedrotlf.barcalc.data.history.BarCalcDatabase
+import com.pedrotlf.barcalc.data.history.RoomHistoryStore
 import com.pedrotlf.barcalc.ui.components.LocalCurrencySymbol
 import com.pedrotlf.barcalc.ui.screens.AboutSheet
+import com.pedrotlf.barcalc.ui.screens.AppDrawer
 import com.pedrotlf.barcalc.ui.screens.ClaimSheet
+import com.pedrotlf.barcalc.ui.screens.ConfirmDialog
+import com.pedrotlf.barcalc.ui.screens.HistoryScreen
 import com.pedrotlf.barcalc.ui.screens.ItemsScreen
 import com.pedrotlf.barcalc.ui.screens.PeopleScreen
+import com.pedrotlf.barcalc.ui.screens.RenameEntryDialog
 import com.pedrotlf.barcalc.ui.screens.ResetConfirmDialog
 import com.pedrotlf.barcalc.ui.screens.ResultsScreen
 import com.pedrotlf.barcalc.ui.theme.BarTabColors
@@ -40,7 +46,12 @@ import com.pedrotlf.barcalc.ui.theme.BarTabColors
 fun BarTabApp(vm: TabViewModel? = null) {
     val appContext = LocalContext.current.applicationContext
     @Suppress("NAME_SHADOWING")
-    val vm = vm ?: viewModel { TabViewModel(SessionRepository(appContext)) }
+    val vm = vm ?: viewModel {
+        TabViewModel(
+            repository = SessionRepository(appContext),
+            history = RoomHistoryStore(BarCalcDatabase.get(appContext).tabHistoryDao()),
+        )
+    }
     val state by vm.uiState.collectAsState()
     val onAction = vm::onAction
 
@@ -48,7 +59,13 @@ fun BarTabApp(vm: TabViewModel? = null) {
         enabled = state.screen != Screen.ITEMS ||
             state.activePersonId != null ||
             state.showAbout ||
-            state.showResetConfirm,
+            state.showResetConfirm ||
+            state.showDrawer ||
+            state.showHistory ||
+            state.pendingDuplicateId != null ||
+            state.renamingEntryId != null ||
+            state.pendingDeleteEntryId != null ||
+            state.showClearHistoryConfirm,
     ) {
         onAction(TabAction.Back)
     }
@@ -102,6 +119,67 @@ fun BarTabApp(vm: TabViewModel? = null) {
                 exit = fadeOut(tween(120)),
             ) {
                 ResetConfirmDialog(onAction)
+            }
+
+            // History lives above the wizard but below the drawer and dialogs.
+            AnimatedVisibility(
+                visible = state.showHistory,
+                enter = fadeIn(tween(160)),
+                exit = fadeOut(tween(120)),
+            ) {
+                HistoryScreen(state.history, onAction)
+            }
+
+            AppDrawer(visible = state.showDrawer, onAction = onAction)
+
+            AnimatedVisibility(
+                visible = state.pendingDuplicateId != null,
+                enter = fadeIn(tween(160)) + scaleIn(tween(160), initialScale = 0.97f),
+                exit = fadeOut(tween(120)),
+            ) {
+                ConfirmDialog(
+                    title = stringResource(R.string.history_replace_title),
+                    message = stringResource(R.string.history_replace_message),
+                    confirmText = stringResource(R.string.history_replace_confirm),
+                    onConfirm = { onAction(TabAction.ConfirmDuplicate) },
+                    onDismiss = { onAction(TabAction.DismissDuplicate) },
+                )
+            }
+
+            AnimatedVisibility(
+                visible = state.renamingEntryId != null,
+                enter = fadeIn(tween(160)) + scaleIn(tween(160), initialScale = 0.97f),
+                exit = fadeOut(tween(120)),
+            ) {
+                RenameEntryDialog(state.renameDraft, onAction)
+            }
+
+            AnimatedVisibility(
+                visible = state.pendingDeleteEntryId != null,
+                enter = fadeIn(tween(160)) + scaleIn(tween(160), initialScale = 0.97f),
+                exit = fadeOut(tween(120)),
+            ) {
+                ConfirmDialog(
+                    title = stringResource(R.string.history_delete_title),
+                    message = stringResource(R.string.history_delete_message),
+                    confirmText = stringResource(R.string.history_delete_confirm),
+                    onConfirm = { onAction(TabAction.ConfirmDeleteEntry) },
+                    onDismiss = { onAction(TabAction.DismissDeleteEntry) },
+                )
+            }
+
+            AnimatedVisibility(
+                visible = state.showClearHistoryConfirm,
+                enter = fadeIn(tween(160)) + scaleIn(tween(160), initialScale = 0.97f),
+                exit = fadeOut(tween(120)),
+            ) {
+                ConfirmDialog(
+                    title = stringResource(R.string.history_clear_title),
+                    message = stringResource(R.string.history_clear_message),
+                    confirmText = stringResource(R.string.history_clear_confirm),
+                    onConfirm = { onAction(TabAction.ConfirmClearHistory) },
+                    onDismiss = { onAction(TabAction.DismissClearHistory) },
+                )
             }
         }
     }

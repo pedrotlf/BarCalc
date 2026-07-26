@@ -1,5 +1,6 @@
 package com.pedrotlf.barcalc.ui
 
+import com.pedrotlf.barcalc.domain.HistoryEntry
 import com.pedrotlf.barcalc.domain.Person
 import com.pedrotlf.barcalc.domain.TabItem
 import kotlinx.serialization.Serializable
@@ -34,6 +35,16 @@ data class TabUiState(
     val expandedResultIds: Set<Int> = emptySet(),
     val showAbout: Boolean = false,
     val showResetConfirm: Boolean = false,
+    val showDrawer: Boolean = false,
+    val showHistory: Boolean = false,
+    val history: List<HistoryEntry> = emptyList(),
+    /** Entry awaiting the "replace the current tab?" confirmation. */
+    val pendingDuplicateId: Long? = null,
+    /** Entry being renamed, plus the in-progress text. */
+    val renamingEntryId: Long? = null,
+    val renameDraft: String = "",
+    val pendingDeleteEntryId: Long? = null,
+    val showClearHistoryConfirm: Boolean = false,
 ) {
     val items: List<TabItem> get() = session.items
     val people: List<Person> get() = session.people
@@ -51,6 +62,9 @@ data class TabUiState(
         get() = newItemName.isNotBlank() && newItemPriceCents > 0L
 
     val addPersonEnabled: Boolean get() = newPersonName.isNotBlank()
+
+    /** Whether there's anything worth warning about before replacing the tab. */
+    val hasWorkInProgress: Boolean get() = items.isNotEmpty() || people.isNotEmpty()
 }
 
 /** Design defaults, hardcoded per the design's props. */

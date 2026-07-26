@@ -3,6 +3,7 @@ package com.pedrotlf.barcalc.ui
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.pedrotlf.barcalc.data.SessionRepository
+import com.pedrotlf.barcalc.data.history.HistoryStore
 import com.pedrotlf.barcalc.domain.Person
 import com.pedrotlf.barcalc.domain.SplitCalculator
 import com.pedrotlf.barcalc.domain.TabItem
@@ -24,6 +25,7 @@ import kotlinx.coroutines.launch
  */
 class TabViewModel(
     private val repository: SessionRepository? = null,
+    private val history: HistoryStore? = null,
 ) : ViewModel() {
 
     private val _uiState = MutableStateFlow(TabUiState())
@@ -31,6 +33,15 @@ class TabViewModel(
 
     init {
         if (repository != null) restoreThenAutoSave(repository)
+        if (history != null) observeHistory(history)
+    }
+
+    private fun observeHistory(store: HistoryStore) {
+        viewModelScope.launch {
+            store.observeEntries().collect { entries ->
+                _uiState.update { it.copy(history = entries) }
+            }
+        }
     }
 
     @OptIn(FlowPreview::class)
@@ -85,9 +96,99 @@ class TabViewModel(
             TabAction.DismissReset -> _uiState.update { it.copy(showResetConfirm = false) }
             TabAction.Reset -> reset()
 
-            TabAction.ShowAbout -> _uiState.update { it.copy(showAbout = true) }
+            TabAction.ShowAbout -> _uiState.update { it.copy(showAbout = true, showDrawer = false) }
             TabAction.HideAbout -> _uiState.update { it.copy(showAbout = false) }
+
+            TabAction.OpenDrawer -> _uiState.update { it.copy(showDrawer = true) }
+            TabAction.CloseDrawer -> _uiState.update { it.copy(showDrawer = false) }
+
+            TabAction.ShowHistory ->
+                _uiState.update { it.copy(showHistory = true, showDrawer = false) }
+            TabAction.HideHistory -> _uiState.update { it.copy(showHistory = false) }
+
+            is TabAction.RequestDuplicate -> requestDuplicate(action.entryId)
+            TabAction.ConfirmDuplicate -> confirmDuplicate()
+            TabAction.DismissDuplicate -> _uiState.update { it.copy(pendingDuplicateId = null) }
+
+            is TabAction.RequestRename -> startRename(action.entryId)
+            TabAction.DismissRename ->
+                _uiState.update { it.copy(renamingEntryId = null, renameDraft = "") }
+            is TabAction.RenameDraftChanged ->
+                _uiState.update { it.copy(renameDraft = action.value) }
+            TabAction.ConfirmRename -> confirmRename()
+
+            is TabAction.RequestDeleteEntry ->
+                _uiState.update { it.copy(pendingDeleteEntryId = action.entryId) }
+            TabAction.ConfirmDeleteEntry -> confirmDeleteEntry()
+            TabAction.DismissDeleteEntry ->
+                _uiState.update { it.copy(pendingDeleteEntryId = null) }
+
+            TabAction.RequestClearHistory ->
+                _uiState.update { it.copy(showClearHistoryConfirm = true) }
+            TabAction.ConfirmClearHistory -> confirmClearHistory()
+            TabAction.DismissClearHistory ->
+                _uiState.update { it.copy(showClearHistoryConfirm = false) }
         }
+    }
+
+    // ── History ────────────────────────────────────────────────────────────
+
+    /**
+     * Duplicating replaces the working tab, so warn first when that would
+     * throw away real work; otherwise go straight through.
+     */
+    private fun requestDuplicate(entryId: Long) {
+        if (_uiState.value.hasWorkInProgress) {
+            _uiState.update { it.copy(pendingDuplicateId = entryId) }
+        } else {
+            duplicate(entryId)
+        }
+    }
+
+    private fun confirmDuplicate() {
+        val id = _uiState.value.pendingDuplicateId ?: return
+        _uiState.update { it.copy(pendingDuplicateId = null) }
+        duplicate(id)
+    }
+
+    /**
+     * Loads the archived session into a fresh working tab — an exact copy,
+     * claims and tip included. The archived entry itself is left untouched.
+     */
+    private fun duplicate(entryId: Long) {
+        val store = history ?: return
+        viewModelScope.launch {
+            val session = store.loadSession(entryId) ?: return@launch
+            _uiState.update {
+                TabUiState(session = session, history = it.history)
+            }
+        }
+    }
+
+    private fun startRename(entryId: Long) {
+        val current = _uiState.value.history.firstOrNull { it.id == entryId }
+        _uiState.update {
+            it.copy(renamingEntryId = entryId, renameDraft = current?.customName.orEmpty())
+        }
+    }
+
+    private fun confirmRename() {
+        val state = _uiState.value
+        val id = state.renamingEntryId ?: return
+        val name = state.renameDraft.trim().takeIf { it.isNotEmpty() }
+        _uiState.update { it.copy(renamingEntryId = null, renameDraft = "") }
+        history?.let { store -> viewModelScope.launch { store.rename(id, name) } }
+    }
+
+    private fun confirmDeleteEntry() {
+        val id = _uiState.value.pendingDeleteEntryId ?: return
+        _uiState.update { it.copy(pendingDeleteEntryId = null) }
+        history?.let { store -> viewModelScope.launch { store.delete(id) } }
+    }
+
+    private fun confirmClearHistory() {
+        _uiState.update { it.copy(showClearHistoryConfirm = false) }
+        history?.let { store -> viewModelScope.launch { store.clearAll() } }
     }
 
     private inline fun updateSession(crossinline block: (TabSession) -> TabSession) {
@@ -221,7 +322,22 @@ class TabViewModel(
     fun goBack(): Boolean {
         val state = _uiState.value
         return when {
+            // Innermost overlays first, outwards.
+            state.renamingEntryId != null -> {
+                _uiState.update { it.copy(renamingEntryId = null, renameDraft = "") }; true
+            }
+            state.pendingDuplicateId != null -> {
+                _uiState.update { it.copy(pendingDuplicateId = null) }; true
+            }
+            state.pendingDeleteEntryId != null -> {
+                _uiState.update { it.copy(pendingDeleteEntryId = null) }; true
+            }
+            state.showClearHistoryConfirm -> {
+                _uiState.update { it.copy(showClearHistoryConfirm = false) }; true
+            }
             state.showAbout -> { _uiState.update { it.copy(showAbout = false) }; true }
+            state.showHistory -> { _uiState.update { it.copy(showHistory = false) }; true }
+            state.showDrawer -> { _uiState.update { it.copy(showDrawer = false) }; true }
             state.showResetConfirm -> { _uiState.update { it.copy(showResetConfirm = false) }; true }
             state.activePersonId != null -> { closeSheet(); true }
             state.screen == Screen.RESULTS -> { updateSession { it.copy(screen = Screen.PEOPLE) }; true }
@@ -239,9 +355,17 @@ class TabViewModel(
         )
     }
 
+    /**
+     * Finish the tab: archive it to history first (so nothing is ever lost),
+     * then clear the working session. Empty tabs aren't worth archiving.
+     */
     fun reset() {
-        _uiState.value = TabUiState()
-        repository?.let { repo -> viewModelScope.launch { repo.clear() } }
+        val finished = _uiState.value.session
+        _uiState.update { TabUiState(history = it.history) }
+        viewModelScope.launch {
+            if (finished.items.isNotEmpty()) history?.archive(finished)
+            repository?.clear()
+        }
     }
 
     private companion object {

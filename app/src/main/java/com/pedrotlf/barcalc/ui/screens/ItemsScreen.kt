@@ -84,9 +84,9 @@ fun ItemsScreen(state: TabUiState, onAction: (TabAction) -> Unit) {
             stringResource(R.string.items_subtitle),
         ) {
             GhostIconButton(
-                icon = AppIcons.Help,
-                contentDescription = stringResource(R.string.cd_about),
-                onClick = { onAction(TabAction.ShowAbout) },
+                icon = AppIcons.Menu,
+                contentDescription = stringResource(R.string.cd_menu),
+                onClick = { onAction(TabAction.OpenDrawer) },
                 size = 44.dp,
                 iconSize = 24.dp,
                 tint = BarTabColors.Neutral600,

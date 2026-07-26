@@ -46,9 +46,39 @@
     <string name="done">Concluir</string>
     <string name="cancel">Cancelar</string>
     <string name="reset_confirm_title">Começar uma nova conta?</string>
-    <string name="reset_confirm_message">Isso apaga a conta atual — itens, pessoas e o que cada um pediu. Não dá para desfazer.</string>
+    <string name="reset_confirm_message">Isso apaga a conta atual — itens, pessoas e o que cada um pediu. Ela é salva no seu histórico antes, então você pode começar de novo a partir dela.</string>
     <string name="reset_confirm_confirm">Começar nova</string>
     <string name="cd_close">Fechar</string>
+
+    <!-- Drawer -->
+    <string name="cd_menu">Menu</string>
+    <string name="menu_title">Menu</string>
+    <string name="menu_history">Histórico</string>
+    <string name="menu_about">Sobre</string>
+
+    <!-- History -->
+    <string name="history_title">Histórico</string>
+    <string name="history_subtitle">As contas concluídas ficam salvas aqui.</string>
+    <string name="history_empty">Nenhuma conta salva ainda. Quando você concluir uma conta, ela aparece aqui.</string>
+    <string name="history_clear_all">Limpar tudo</string>
+    <string name="history_entry_summary">%1$d itens · %2$d pessoas</string>
+    <string name="cd_rename_entry">Renomear</string>
+    <string name="cd_delete_entry">Excluir</string>
+    <string name="history_duplicate_hint">Toque em uma conta para começar uma nova a partir dela.</string>
+
+    <!-- History dialogs -->
+    <string name="history_replace_title">Substituir a conta atual?</string>
+    <string name="history_replace_message">Você tem uma conta em andamento. Começar a partir desta conta salva vai descartá-la.</string>
+    <string name="history_replace_confirm">Substituir</string>
+    <string name="history_rename_title">Dê um nome a esta conta</string>
+    <string name="history_rename_placeholder">ex.: Sexta no Zé</string>
+    <string name="history_rename_confirm">Salvar</string>
+    <string name="history_delete_title">Excluir esta conta?</string>
+    <string name="history_delete_message">Esta conta salva será removida definitivamente.</string>
+    <string name="history_delete_confirm">Excluir</string>
+    <string name="history_clear_title">Limpar todo o histórico?</string>
+    <string name="history_clear_message">Todas as contas salvas serão removidas definitivamente. Não dá para desfazer.</string>
+    <string name="history_clear_confirm">Limpar tudo</string>
 
     <!-- Tela 3: Resultado -->
     <string name="results_title">Veja a divisão</string>
@@ -71,7 +101,6 @@
     <string name="cd_increase">Aumentar</string>
 
     <!-- Sobre -->
-    <string name="cd_about">Sobre</string>
     <string name="about_title">Sobre</string>
     <string name="about_version">Versão %1$s</string>
     <string name="close">Fechar</string>
