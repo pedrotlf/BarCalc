@@ -51,4 +51,38 @@ sealed interface TabAction {
     // ── About ──────────────────────────────────────────────────────────────
     data object ShowAbout : TabAction
     data object HideAbout : TabAction
+
+    // ── Drawer ─────────────────────────────────────────────────────────────
+    data object OpenDrawer : TabAction
+    data object CloseDrawer : TabAction
+
+    // ── History ────────────────────────────────────────────────────────────
+    data object ShowHistory : TabAction
+    data object HideHistory : TabAction
+
+    /**
+     * Tapped a history entry. Opens the replace warning when a tab is already
+     * in progress, otherwise duplicates straight away.
+     */
+    data class RequestDuplicate(val entryId: Long) : TabAction
+
+    /** Confirmed the warning: replace the current tab with the duplicate. */
+    data object ConfirmDuplicate : TabAction
+    data object DismissDuplicate : TabAction
+
+    /** Open/close the rename prompt for a history entry. */
+    data class RequestRename(val entryId: Long) : TabAction
+    data object DismissRename : TabAction
+    data class RenameDraftChanged(val value: String) : TabAction
+    data object ConfirmRename : TabAction
+
+    /** Delete a single entry, with confirmation. */
+    data class RequestDeleteEntry(val entryId: Long) : TabAction
+    data object ConfirmDeleteEntry : TabAction
+    data object DismissDeleteEntry : TabAction
+
+    /** Wipe the whole history, with confirmation. */
+    data object RequestClearHistory : TabAction
+    data object ConfirmClearHistory : TabAction
+    data object DismissClearHistory : TabAction
 }

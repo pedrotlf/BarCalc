@@ -68,6 +68,27 @@ object AppIcons {
         )
     }
 
+    val Menu: ImageVector by lazy {
+        strokeIcon("Menu", "M4 6h16", "M4 12h16", "M4 18h16")
+    }
+
+    val History: ImageVector by lazy {
+        strokeIcon(
+            "History",
+            "M3.05 11a9 9 0 1 1 .5 4",
+            "M3 21v-6h6",
+            "M12 7v5l3.5 2",
+        )
+    }
+
+    val Pencil: ImageVector by lazy {
+        strokeIcon(
+            "Pencil",
+            "M12 20h9",
+            "M16.5 3.5a2.12 2.12 0 0 1 3 3L7 19l-4 1 1-4z",
+        )
+    }
+
     val Help: ImageVector by lazy {
         strokeIcon(
             "Help",
