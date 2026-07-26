@@ -22,6 +22,8 @@ import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.platform.LocalFocusManager
+import androidx.compose.ui.platform.LocalSoftwareKeyboardController
 import androidx.compose.ui.res.stringResource
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.pedrotlf.barcalc.R
@@ -53,7 +55,21 @@ fun BarTabApp(vm: TabViewModel? = null) {
         )
     }
     val state by vm.uiState.collectAsState()
-    val onAction = vm::onAction
+
+    // Opening a sheet or leaving the screen shouldn't leave the keyboard
+    // covering what was just opened. Handled here, at the single entry point
+    // every screen already routes through, rather than at each call site.
+    // Focus is cleared too, otherwise the field it belongs to just summons the
+    // keyboard back.
+    val keyboard = LocalSoftwareKeyboardController.current
+    val focusManager = LocalFocusManager.current
+    val onAction: (TabAction) -> Unit = { action ->
+        if (action.dismissesKeyboard) {
+            focusManager.clearFocus()
+            keyboard?.hide()
+        }
+        vm.onAction(action)
+    }
 
     BackHandler(
         enabled = state.screen != Screen.ITEMS ||
