@@ -45,10 +45,10 @@ import com.pedrotlf.barcalc.ui.theme.BarTabDimens
 import com.pedrotlf.barcalc.ui.theme.BarTabType
 
 /**
- * Right-hand slide-in menu holding the app-level destinations (History,
- * About). Hand-rolled rather than Material's [androidx.compose.material3
- * .ModalNavigationDrawer] to match the app's own sheet styling and to open
- * from the right without an RTL layout hack.
+ * Slide-in menu holding the app-level destinations (History, About). Opens
+ * from the left, the same edge as the header button that toggles it.
+ * Hand-rolled rather than Material's [androidx.compose.material3
+ * .ModalNavigationDrawer] so it matches the app's own sheet styling.
  */
 @Composable
 fun AppDrawer(visible: Boolean, onAction: (TabAction) -> Unit) {
@@ -73,16 +73,16 @@ fun AppDrawer(visible: Boolean, onAction: (TabAction) -> Unit) {
             val panelWidth = (maxWidth * 0.72f).coerceAtMost(320.dp)
             AnimatedVisibility(
                 visible = visible,
-                modifier = Modifier.align(Alignment.CenterEnd),
-                enter = slideInHorizontally(tween(220)) { it },
-                exit = slideOutHorizontally(tween(180)) { it },
+                modifier = Modifier.align(Alignment.CenterStart),
+                enter = slideInHorizontally(tween(220)) { -it },
+                exit = slideOutHorizontally(tween(180)) { -it },
             ) {
                 Column(
                     Modifier
                         .width(panelWidth)
                         .fillMaxHeight()
-                        .shadow(24.dp, RoundedCornerShape(topStart = BarTabDimens.RadiusLg, bottomStart = BarTabDimens.RadiusLg))
-                        .clip(RoundedCornerShape(topStart = BarTabDimens.RadiusLg, bottomStart = BarTabDimens.RadiusLg))
+                        .shadow(24.dp, RoundedCornerShape(topEnd = BarTabDimens.RadiusLg, bottomEnd = BarTabDimens.RadiusLg))
+                        .clip(RoundedCornerShape(topEnd = BarTabDimens.RadiusLg, bottomEnd = BarTabDimens.RadiusLg))
                         .background(BarTabColors.Bg)
                         .clickable(
                             interactionSource = remember { MutableInteractionSource() },
