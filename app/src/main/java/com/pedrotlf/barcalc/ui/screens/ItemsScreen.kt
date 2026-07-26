@@ -220,24 +220,30 @@ private fun ItemRow(item: TabItem, onAction: (TabAction) -> Unit) {
         horizontalArrangement = Arrangement.spacedBy(6.dp),
     ) {
         // Everything but the delete button, which stays pinned right. The
-        // stepper and total reflow onto a second row once the name field would
-        // be squeezed past legibility.
+        // stepper and total share a Row so they count as one item here and
+        // always reflow together — the total can never strand on a row of its
+        // own while the stepper stays behind.
         //
-        // SpaceBetween is what pushes the total to the end of that second row.
-        // On the first row the name field's weight has already absorbed the
-        // slack, so there is nothing left for the arrangement to spread and the
-        // children sit together — which is why the gaps between them come from
-        // each child's own end padding rather than from the arrangement.
+        // That also means the arrangement has a single item to place on the
+        // wrapped row, so End is what keeps the total flush with the rest of
+        // the column. The first row is unaffected: the name field's weight has
+        // already taken up the slack, leaving the arrangement nothing to move,
+        // which is why the gaps there come from each child's end padding.
         FlowRow(
             modifier = Modifier.weight(1f),
-            horizontalArrangement = Arrangement.SpaceBetween,
+            horizontalArrangement = Arrangement.End,
             verticalArrangement = Arrangement.spacedBy(8.dp),
             itemVerticalAlignment = Alignment.CenterVertically,
         ) {
             ItemNameField(item, onAction, Modifier.weight(1f).padding(end = 6.dp))
             ItemPriceField(item, onAction, Modifier.padding(end = 6.dp))
-            ItemQtyStepper(item, onAction, Modifier.padding(end = 6.dp))
-            ItemTotal(item)
+            Row(
+                verticalAlignment = Alignment.CenterVertically,
+                horizontalArrangement = Arrangement.spacedBy(6.dp),
+            ) {
+                ItemQtyStepper(item, onAction)
+                ItemTotal(item)
+            }
         }
         GhostIconButton(
             icon = AppIcons.Trash,
