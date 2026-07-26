@@ -86,3 +86,33 @@ sealed interface TabAction {
     data object ConfirmClearHistory : TabAction
     data object DismissClearHistory : TabAction
 }
+
+/**
+ * Actions that move the user away from whatever they were typing in — opening
+ * a sheet or menu, or stepping to another screen. The keyboard is dismissed
+ * for these before they run, so it can't sit over the thing being opened.
+ *
+ * Listed here beside the actions themselves so a new destination has to make
+ * the same decision, rather than the rule being buried in call sites.
+ */
+val TabAction.dismissesKeyboard: Boolean
+    get() = when (this) {
+        // Navigation between wizard screens.
+        TabAction.GoToPeople,
+        TabAction.GoToResults,
+        TabAction.Back,
+        // Menus and full-screen destinations.
+        TabAction.OpenDrawer,
+        TabAction.ShowHistory,
+        TabAction.ShowAbout,
+        // Sheets and dialogs that cover the screen.
+        TabAction.RequestReset,
+        TabAction.RequestClearHistory,
+        is TabAction.OpenPerson,
+        is TabAction.RequestDuplicate,
+        is TabAction.RequestRename,
+        is TabAction.RequestDeleteEntry,
+        -> true
+
+        else -> false
+    }
