@@ -237,13 +237,8 @@ private fun ItemRow(item: TabItem, onAction: (TabAction) -> Unit) {
         ) {
             ItemNameField(item, onAction, Modifier.weight(1f).padding(end = 6.dp))
             ItemPriceField(item, onAction, Modifier.padding(end = 6.dp))
-            Row(
-                verticalAlignment = Alignment.CenterVertically,
-                horizontalArrangement = Arrangement.spacedBy(6.dp),
-            ) {
-                ItemQtyStepper(item, onAction)
-                ItemTotal(item)
-            }
+            ItemQtyStepper(item, onAction, Modifier.padding(end = 6.dp))
+            ItemTotal(item)
         }
         GhostIconButton(
             icon = AppIcons.Trash,

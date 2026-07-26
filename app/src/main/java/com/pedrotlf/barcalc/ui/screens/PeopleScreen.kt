@@ -4,6 +4,7 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.FlowRow
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
@@ -166,10 +167,15 @@ private fun PersonRow(
         horizontalArrangement = Arrangement.spacedBy(BarTabDimens.ListGap),
     ) {
         Avatar(SplitCalculator.initialsFor(person.name), BarTabColors.avatarColor(index))
-        Row(
-            Modifier.weight(1f),
-            verticalAlignment = Alignment.CenterVertically,
+        // The claim summary drops under the name instead of being ellipsised
+        // once the two stop fitting side by side. The avatar, chevron and trash
+        // stay outside, so the row's centre alignment keeps them mid-height
+        // whether this takes one line or two.
+        FlowRow(
+            modifier = Modifier.weight(1f),
             horizontalArrangement = Arrangement.spacedBy(8.dp),
+            verticalArrangement = Arrangement.spacedBy(2.dp),
+            itemVerticalAlignment = Alignment.CenterVertically,
         ) {
             Text(
                 person.name,
