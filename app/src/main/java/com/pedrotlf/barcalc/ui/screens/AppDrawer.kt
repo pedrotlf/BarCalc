@@ -21,7 +21,6 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -108,7 +107,7 @@ fun AppDrawer(visible: Boolean, onAction: (TabAction) -> Unit) {
                             iconSize = 16.dp,
                         )
                     }
-                    HorizontalDivider(color = BarTabColors.Accent200, thickness = 1.dp)
+                    SectionDivider()
 
                     DrawerItem(
                         icon = AppIcons.History,

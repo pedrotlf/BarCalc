@@ -17,6 +17,7 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
+import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
@@ -200,6 +201,12 @@ private fun FooterBar(content: @Composable ColumnScope.() -> Unit) {
         verticalArrangement = Arrangement.spacedBy(BarTabDimens.ListGap),
         content = content,
     )
+}
+
+/** Hairline rule between sections of a sheet or menu. */
+@Composable
+fun SectionDivider() {
+    HorizontalDivider(color = BarTabColors.Surface, thickness = 1.dp)
 }
 
 /** Centered muted hint shown when a list has no entries yet. */
