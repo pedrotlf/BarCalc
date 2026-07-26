@@ -88,6 +88,26 @@ fun PrimaryButton(
     }
 }
 
+/** Pill secondary button: transparent with an accent outline and accent label. */
+@Composable
+fun SecondaryButton(
+    text: String,
+    onClick: () -> Unit,
+    modifier: Modifier = Modifier,
+) {
+    Box(
+        modifier = modifier
+            .clip(CircleShape)
+            .roundedBorder(BarTabColors.Accent300, cornerRadius = 100.dp, strokeWidth = 1.5.dp)
+            .clickable(onClick = onClick)
+            .defaultMinSize(minHeight = 46.dp)
+            .padding(horizontal = 18.dp),
+        contentAlignment = Alignment.Center,
+    ) {
+        Text(text, style = BarTabType.Button, color = BarTabColors.Accent700)
+    }
+}
+
 /** Square-ish pill icon button on accent bg (e.g. the 44dp "add" buttons). */
 @Composable
 fun PrimaryIconButton(

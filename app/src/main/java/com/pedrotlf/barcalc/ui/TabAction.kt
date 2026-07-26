@@ -38,6 +38,14 @@ sealed interface TabAction {
 
     // ── Results screen ─────────────────────────────────────────────────────
     data class ToggleExpand(val personId: Int) : TabAction
+
+    /** Ask to start over — opens the confirmation dialog (see [Reset]). */
+    data object RequestReset : TabAction
+
+    /** Dismiss the reset confirmation without wiping anything. */
+    data object DismissReset : TabAction
+
+    /** Confirmed: wipe the tab and start fresh. */
     data object Reset : TabAction
 
     // ── About ──────────────────────────────────────────────────────────────

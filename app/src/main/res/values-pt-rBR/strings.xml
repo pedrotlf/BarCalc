@@ -44,6 +44,10 @@
     <string name="claim_all">Todas</string>
     <string name="unit_price_each">%1$s cada</string>
     <string name="done">Concluir</string>
+    <string name="cancel">Cancelar</string>
+    <string name="reset_confirm_title">Começar uma nova conta?</string>
+    <string name="reset_confirm_message">Isso apaga a conta atual — itens, pessoas e o que cada um pediu. Não dá para desfazer.</string>
+    <string name="reset_confirm_confirm">Começar nova</string>
     <string name="cd_close">Fechar</string>
 
     <!-- Tela 3: Resultado -->
