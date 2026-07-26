@@ -75,8 +75,9 @@ fun PeopleScreen(state: TabUiState, onAction: (TabAction) -> Unit) {
         },
     ) {
         ScreenHeader(
-            stringResource(R.string.people_title),
-            stringResource(R.string.people_subtitle),
+            title = stringResource(R.string.people_title),
+            subtitle = stringResource(R.string.people_subtitle),
+            leading = { HeaderBackButton { onAction(TabAction.Back) } },
         )
         AddPersonCard(state, onAction)
         if (state.people.isNotEmpty()) {

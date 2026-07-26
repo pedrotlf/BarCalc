@@ -79,19 +79,21 @@ fun ItemsScreen(state: TabUiState, onAction: (TabAction) -> Unit) {
             }
         },
     ) {
+        // First screen: nothing to go back to, so the leading slot stays empty.
         ScreenHeader(
-            stringResource(R.string.items_title),
-            stringResource(R.string.items_subtitle),
-        ) {
-            GhostIconButton(
-                icon = AppIcons.Menu,
-                contentDescription = stringResource(R.string.cd_menu),
-                onClick = { onAction(TabAction.OpenDrawer) },
-                size = 44.dp,
-                iconSize = 24.dp,
-                tint = BarTabColors.Neutral600,
-            )
-        }
+            title = stringResource(R.string.items_title),
+            subtitle = stringResource(R.string.items_subtitle),
+            action = {
+                GhostIconButton(
+                    icon = AppIcons.Menu,
+                    contentDescription = stringResource(R.string.cd_menu),
+                    onClick = { onAction(TabAction.OpenDrawer) },
+                    size = BarTabDimens.HeaderSlot,
+                    iconSize = 24.dp,
+                    tint = BarTabColors.Neutral600,
+                )
+            },
+        )
         AddItemCard(state, onAction)
         if (state.items.isNotEmpty()) {
             Column(

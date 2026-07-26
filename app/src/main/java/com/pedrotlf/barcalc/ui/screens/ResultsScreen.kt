@@ -71,8 +71,8 @@ fun ResultsScreen(state: TabUiState, onAction: (TabAction) -> Unit) {
         },
     ) {
         ScreenHeader(
-            stringResource(R.string.results_title),
-            if (state.tipEnabled) {
+            title = stringResource(R.string.results_title),
+            subtitle = if (state.tipEnabled) {
                 stringResource(
                     R.string.results_subtitle_with_tip,
                     peopleLabel,
@@ -86,6 +86,7 @@ fun ResultsScreen(state: TabUiState, onAction: (TabAction) -> Unit) {
                     SplitCalculator.formatMoney(subtotal, currency),
                 )
             },
+            leading = { HeaderBackButton { onAction(TabAction.Back) } },
         )
         Column(
             Modifier.padding(

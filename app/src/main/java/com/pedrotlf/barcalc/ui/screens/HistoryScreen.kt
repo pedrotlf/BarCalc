@@ -57,19 +57,12 @@ fun HistoryScreen(entries: List<HistoryEntry>, onAction: (TabAction) -> Unit) {
                 )
             },
         ) {
+            // Dismissed rather than stepped back through, so it gets an X.
             ScreenHeader(
-                stringResource(R.string.history_title),
-                stringResource(R.string.history_subtitle),
-            ) {
-                GhostIconButton(
-                    icon = AppIcons.Close,
-                    contentDescription = stringResource(R.string.cd_close),
-                    onClick = { onAction(TabAction.HideHistory) },
-                    size = 40.dp,
-                    iconSize = 18.dp,
-                    tint = BarTabColors.Neutral600,
-                )
-            }
+                title = stringResource(R.string.history_title),
+                subtitle = stringResource(R.string.history_subtitle),
+                leading = { HeaderCloseButton { onAction(TabAction.HideHistory) } },
+            )
 
             if (entries.isEmpty()) {
                 EmptyListHint(stringResource(R.string.history_empty))

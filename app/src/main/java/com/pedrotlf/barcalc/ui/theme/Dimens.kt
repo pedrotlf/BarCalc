@@ -17,6 +17,20 @@ object BarTabDimens {
     /** Inner padding of the dashed add-cards. */
     val CardPadding = 14.dp
 
+    /**
+     * Size of the reserved slots either side of a screen header. Both are
+     * always laid out, empty or not, so the title sits in exactly the same
+     * place on every screen and never jumps when navigating.
+     */
+    val HeaderSlot = 44.dp
+
+    /**
+     * Header rows inset less than [ScreenHPadding] because the slot's touch
+     * target is wider than its glyph — this lands the icon roughly over the
+     * content edge below it.
+     */
+    val HeaderHPadding = 8.dp
+
     val RadiusSm = 4.dp
     val RadiusMd = 8.dp
 

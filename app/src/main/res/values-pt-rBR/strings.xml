@@ -49,6 +49,7 @@
     <string name="reset_confirm_message">Isso apaga a conta atual — itens, pessoas e o que cada um pediu. Ela é salva no seu histórico antes, então você pode começar de novo a partir dela.</string>
     <string name="reset_confirm_confirm">Começar nova</string>
     <string name="cd_close">Fechar</string>
+    <string name="cd_back">Voltar</string>
 
     <!-- Drawer -->
     <string name="cd_menu">Menu</string>

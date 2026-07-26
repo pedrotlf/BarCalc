@@ -49,6 +49,7 @@
     <string name="reset_confirm_message">This clears the current tab — items, people, and who claimed what. It\'s saved to your history first, so you can start from it again later.</string>
     <string name="reset_confirm_confirm">Start new</string>
     <string name="cd_close">Close</string>
+    <string name="cd_back">Back</string>
 
     <!-- Drawer -->
     <string name="cd_menu">Menu</string>

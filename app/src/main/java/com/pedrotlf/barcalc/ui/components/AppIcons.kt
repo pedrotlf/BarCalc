@@ -55,6 +55,10 @@ object AppIcons {
         strokeIcon("ChevronRight", "M9 18 L15 12 L9 6")
     }
 
+    val ArrowLeft: ImageVector by lazy {
+        strokeIcon("ArrowLeft", "M19 12 L5 12", "M12 19 L5 12 L12 5")
+    }
+
     val Close: ImageVector by lazy {
         strokeIcon("Close", "M18 6 L6 18", "M6 6 L18 18")
     }
