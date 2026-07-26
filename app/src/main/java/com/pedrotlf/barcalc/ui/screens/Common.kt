@@ -191,7 +191,7 @@ private fun FooterBar(content: @Composable ColumnScope.() -> Unit) {
         Modifier
             .fillMaxWidth()
             .background(BarTabColors.Bg)
-            .topBorder(BarTabColors.Accent200)
+            .topBorder(BarTabColors.Surface)
             .padding(
                 start = BarTabDimens.ScreenHPadding,
                 top = 14.dp,

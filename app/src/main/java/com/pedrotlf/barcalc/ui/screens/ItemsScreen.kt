@@ -5,6 +5,7 @@ import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.FlowRow
 import androidx.compose.foundation.layout.defaultMinSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
@@ -135,56 +136,77 @@ private fun AddItemCard(state: TabUiState, onAction: (TabAction) -> Unit) {
             keyboardOptions = NameCapitalization,
             modifier = Modifier.fillMaxWidth(),
         )
-        Row(
-            verticalAlignment = Alignment.CenterVertically,
+        // The stepper and add button stay together and reflow onto their own
+        // row once they stop fitting beside the price field. The price field's
+        // own minimum width decides when that happens, so it follows the
+        // locale's currency symbol and suffix instead of a screen-size guess.
+        FlowRow(
             horizontalArrangement = Arrangement.spacedBy(BarTabDimens.ListGap),
+            verticalArrangement = Arrangement.spacedBy(BarTabDimens.ListGap),
+            itemVerticalAlignment = Alignment.CenterVertically,
         ) {
-            // $ price field on the app background
+            PriceField(state, onAction, Modifier.weight(1f))
             Row(
-                Modifier
-                    .weight(1f)
-                    .clip(RoundedCornerShape(BarTabDimens.RadiusMd))
-                    .background(BarTabColors.Bg)
-                    .padding(horizontal = 10.dp)
-                    .defaultMinSize(minHeight = 44.dp),
+                modifier = Modifier.weight(1f),
                 verticalAlignment = Alignment.CenterVertically,
-                horizontalArrangement = Arrangement.spacedBy(4.dp),
+                horizontalArrangement = Arrangement.SpaceBetween,
             ) {
-                Text(
-                    LocalCurrencySymbol.current,
-                    style = BarTabType.Body.copy(fontSize = 15.sp, color = BarTabColors.Neutral700),
+                QtyStepper(
+                    label = "${state.newItemQty}",
+                    onDec = { onAction(TabAction.DecNewQty) },
+                    onInc = { onAction(TabAction.IncNewQty) },
                 )
-                MoneyField(
-                    cents = state.newItemPriceCents,
-                    onCentsChange = { onAction(TabAction.NewItemPriceChanged(it)) },
-                    textStyle = BarTabType.Body.copy(fontSize = 15.sp),
-                    modifier = Modifier
-                        .weight(1f)
-                        .padding(horizontal = 4.dp, vertical = 10.dp),
-                )
-                Text(
-                    stringResource(R.string.price_each_suffix),
-                    style = BarTabType.Body.copy(fontSize = 13.sp, color = BarTabColors.Neutral600),
+                PrimaryIconButton(
+                    icon = AppIcons.Plus,
+                    contentDescription = stringResource(R.string.cd_add_item),
+                    onClick = { onAction(TabAction.AddItem) },
+                    enabled = state.addItemEnabled,
                 )
             }
-            QtyStepper(
-                label = "${state.newItemQty}",
-                onDec = { onAction(TabAction.DecNewQty) },
-                onInc = { onAction(TabAction.IncNewQty) },
-            )
-            PrimaryIconButton(
-                icon = AppIcons.Plus,
-                contentDescription = stringResource(R.string.cd_add_item),
-                onClick = { onAction(TabAction.AddItem) },
-                enabled = state.addItemEnabled,
-            )
         }
+    }
+}
+
+/** Price input on the app background: "<symbol> <amount> each". */
+@Composable
+private fun PriceField(
+    state: TabUiState,
+    onAction: (TabAction) -> Unit,
+    modifier: Modifier = Modifier,
+) {
+    Row(
+        modifier
+            // Legibility floor, and so what makes the row reflow: once the
+            // field can't stay this wide the controls beside it move down.
+            .widthIn(min = 150.dp)
+            .clip(RoundedCornerShape(BarTabDimens.RadiusMd))
+            .background(BarTabColors.Bg)
+            .padding(horizontal = 10.dp)
+            .defaultMinSize(minHeight = 44.dp),
+        verticalAlignment = Alignment.CenterVertically,
+        horizontalArrangement = Arrangement.spacedBy(4.dp),
+    ) {
+        Text(
+            LocalCurrencySymbol.current,
+            style = BarTabType.Body.copy(fontSize = 15.sp, color = BarTabColors.Neutral700),
+        )
+        MoneyField(
+            cents = state.newItemPriceCents,
+            onCentsChange = { onAction(TabAction.NewItemPriceChanged(it)) },
+            textStyle = BarTabType.Body.copy(fontSize = 15.sp),
+            modifier = Modifier
+                .weight(1f)
+                .padding(horizontal = 4.dp, vertical = 10.dp),
+        )
+        Text(
+            stringResource(R.string.price_each_suffix),
+            style = BarTabType.Body.copy(fontSize = 13.sp, color = BarTabColors.Neutral600),
+        )
     }
 }
 
 @Composable
 private fun ItemRow(item: TabItem, onAction: (TabAction) -> Unit) {
-    val currency = LocalCurrencySymbol.current
     Row(
         Modifier
             .fillMaxWidth()
@@ -192,59 +214,30 @@ private fun ItemRow(item: TabItem, onAction: (TabAction) -> Unit) {
             .background(BarTabColors.Accent100)
             .roundedBorder(BarTabColors.Accent200, cornerRadius = BarTabDimens.RadiusLg)
             .padding(horizontal = 10.dp, vertical = 9.dp),
+        // Centred so the delete button sits mid-row whether the content takes
+        // one line or wraps to two.
         verticalAlignment = Alignment.CenterVertically,
         horizontalArrangement = Arrangement.spacedBy(6.dp),
     ) {
-        BareTextField(
-            value = item.name,
-            onValueChange = { onAction(TabAction.ItemNameChanged(item.id, it)) },
-            textStyle = BarTabType.RowTitle,
-            keyboardOptions = NameCapitalization,
+        // Everything but the delete button, which stays pinned right so the
+        // row's centre alignment holds it mid-height across one line or two.
+        //
+        // End keeps whatever wraps flush with the column above it. The first
+        // row is unaffected: the name field's weight has already taken up the
+        // slack, leaving the arrangement nothing to move — which is why the
+        // gaps there come from each child's end padding rather than from the
+        // arrangement itself.
+        FlowRow(
             modifier = Modifier.weight(1f),
-        )
-        // Editable price — the box grows with the amount so large values aren't hidden.
-        val priceStyle = BarTabType.Caption.copy(color = BarTabColors.Neutral700)
-        Row(
-            Modifier
-                .clip(RoundedCornerShape(BarTabDimens.RadiusSm))
-                .background(BarTabColors.Bg)
-                .padding(horizontal = 6.dp, vertical = 6.dp),
-            verticalAlignment = Alignment.CenterVertically,
-            horizontalArrangement = Arrangement.spacedBy(1.dp),
+            horizontalArrangement = Arrangement.End,
+            verticalArrangement = Arrangement.spacedBy(8.dp),
+            itemVerticalAlignment = Alignment.CenterVertically,
         ) {
-            Text(currency, style = BarTabType.Caption)
-            Box(contentAlignment = Alignment.CenterStart) {
-                // Invisible sizer gives the field exactly the width of its text.
-                Text(
-                    SplitCalculator.formatMoney(item.priceCents, symbol = ""),
-                    style = priceStyle,
-                    maxLines = 1,
-                    softWrap = false,
-                    modifier = Modifier
-                        .widthIn(min = 26.dp)
-                        .padding(end = 2.dp) // caret room so the first digit never clips
-                        .alpha(0f),
-                )
-                MoneyField(
-                    cents = item.priceCents,
-                    onCentsChange = { onAction(TabAction.ItemPriceChanged(item.id, it)) },
-                    textStyle = priceStyle,
-                    modifier = Modifier.matchParentSize(),
-                )
-            }
+            ItemNameField(item, onAction, Modifier.weight(1f).padding(end = 6.dp))
+            ItemPriceField(item, onAction, Modifier.padding(end = 6.dp))
+            ItemQtyStepper(item, onAction, Modifier.padding(end = 6.dp))
+            ItemTotal(item)
         }
-        QtyStepper(
-            label = "${item.qty}",
-            onDec = { onAction(TabAction.DecItemQty(item.id)) },
-            onInc = { onAction(TabAction.IncItemQty(item.id)) },
-            size = StepperSize.Compact,
-        )
-        Text(
-            SplitCalculator.formatMoney(item.priceCents * item.qty, currency),
-            style = BarTabType.Money,
-            textAlign = TextAlign.End,
-            modifier = Modifier.widthIn(min = 44.dp),
-        )
         GhostIconButton(
             icon = AppIcons.Trash,
             contentDescription = stringResource(R.string.cd_remove_item),
@@ -255,9 +248,107 @@ private fun ItemRow(item: TabItem, onAction: (TabAction) -> Unit) {
     }
 }
 
+@Composable
+private fun ItemNameField(
+    item: TabItem,
+    onAction: (TabAction) -> Unit,
+    modifier: Modifier = Modifier,
+) {
+    BareTextField(
+        value = item.name,
+        onValueChange = { onAction(TabAction.ItemNameChanged(item.id, it)) },
+        textStyle = BarTabType.RowTitle,
+        keyboardOptions = NameCapitalization,
+        // Legibility floor, and so what makes the row reflow: once the name
+        // can't stay this wide, the stepper and total move to a row of their own.
+        modifier = modifier.widthIn(min = 96.dp),
+    )
+}
+
+/** Editable unit price — the box grows with the amount so large values aren't hidden. */
+@Composable
+private fun ItemPriceField(
+    item: TabItem,
+    onAction: (TabAction) -> Unit,
+    modifier: Modifier = Modifier,
+) {
+    val currency = LocalCurrencySymbol.current
+    val priceStyle = BarTabType.Caption.copy(color = BarTabColors.Neutral700)
+    Row(
+        // Caller-supplied spacing sits outside the box, not inside it.
+        modifier
+            .clip(RoundedCornerShape(BarTabDimens.RadiusSm))
+            .background(BarTabColors.Bg)
+            .padding(horizontal = 6.dp, vertical = 6.dp),
+        verticalAlignment = Alignment.CenterVertically,
+        horizontalArrangement = Arrangement.spacedBy(1.dp),
+    ) {
+        Text(currency, style = BarTabType.Caption)
+        Box(contentAlignment = Alignment.CenterStart) {
+            // Invisible sizer gives the field exactly the width of its text.
+            Text(
+                SplitCalculator.formatMoney(item.priceCents, symbol = ""),
+                style = priceStyle,
+                maxLines = 1,
+                softWrap = false,
+                modifier = Modifier
+                    .widthIn(min = 26.dp)
+                    .padding(end = 2.dp) // caret room so the first digit never clips
+                    .alpha(0f),
+            )
+            MoneyField(
+                cents = item.priceCents,
+                onCentsChange = { onAction(TabAction.ItemPriceChanged(item.id, it)) },
+                textStyle = priceStyle,
+                modifier = Modifier.matchParentSize(),
+            )
+        }
+    }
+}
+
+@Composable
+private fun ItemQtyStepper(
+    item: TabItem,
+    onAction: (TabAction) -> Unit,
+    modifier: Modifier = Modifier,
+) {
+    QtyStepper(
+        modifier = modifier,
+        label = "${item.qty}",
+        onDec = { onAction(TabAction.DecItemQty(item.id)) },
+        onInc = { onAction(TabAction.IncItemQty(item.id)) },
+        size = StepperSize.Compact,
+    )
+}
+
+@Composable
+private fun ItemTotal(item: TabItem) {
+    Text(
+        SplitCalculator.formatMoney(item.priceCents * item.qty, LocalCurrencySymbol.current),
+        style = BarTabType.Money,
+        textAlign = TextAlign.End,
+        modifier = Modifier.widthIn(min = 44.dp),
+    )
+}
+
 @Preview(showBackground = true, backgroundColor = 0xFFF5EAD8, heightDp = 700)
 @Composable
 private fun ItemsScreenPreview() {
+    BarCalcTheme {
+        ItemsScreen(state = previewTabState(), onAction = {})
+    }
+}
+
+/** Narrow enough that the add card drops its stepper and button to a second row. */
+@Preview(
+    name = "Narrow — stacked add card",
+    showBackground = true,
+    backgroundColor = 0xFFF5EAD8,
+    heightDp = 700,
+    widthDp = 320,
+)
+@Composable
+private fun ItemsScreenNarrowPreview() {
     BarCalcTheme {
         ItemsScreen(state = previewTabState(), onAction = {})
     }

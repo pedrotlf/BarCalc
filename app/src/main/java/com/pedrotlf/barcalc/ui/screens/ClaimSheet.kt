@@ -99,7 +99,9 @@ fun ClaimSheet(
             Text(
                 stringResource(R.string.claim_instructions),
                 style = BarTabType.Body.copy(fontSize = 11.5.sp, color = BarTabColors.Neutral600),
-                modifier = Modifier.padding(start = 16.dp, top = 10.dp, end = 16.dp),
+                modifier = Modifier.padding(
+                    start = 16.dp, top = 10.dp, end = 16.dp, bottom = 6.dp
+                ),
             )
             Column(
                 Modifier
@@ -127,7 +129,7 @@ private fun SheetHeader(person: Person, personIndex: Int, onAction: (TabAction) 
     Row(
         Modifier
             .fillMaxWidth()
-            .bottomBorder(BarTabColors.Accent200)
+            .bottomBorder(BarTabColors.Surface)
             .padding(start = 16.dp, top = 16.dp, end = 16.dp, bottom = 12.dp),
         verticalAlignment = Alignment.CenterVertically,
         horizontalArrangement = Arrangement.spacedBy(12.dp),
@@ -160,7 +162,7 @@ private fun ClaimRow(item: TabItem, person: Person, onAction: (TabAction) -> Uni
     BoxWithConstraints(
         Modifier
             .fillMaxWidth()
-            .bottomBorder(BarTabColors.Accent100)
+            .bottomBorder(BarTabColors.Surface)
             .padding(vertical = 10.dp),
     ) {
         // Name/price takes only what it needs, up to half the row; the claim

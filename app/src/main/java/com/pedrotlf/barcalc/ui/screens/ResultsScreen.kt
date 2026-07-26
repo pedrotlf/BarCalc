@@ -161,7 +161,9 @@ private fun ResultCard(
             Column(
                 Modifier
                     .fillMaxWidth()
-                    .topBorder(BarTabColors.Accent200)
+                    // A step darker than the sheets' Surface rules, because this
+                    // one sits on a Surface card and would otherwise vanish.
+                    .topBorder(BarTabColors.Neutral300)
                     .padding(top = 6.dp),
                 verticalArrangement = Arrangement.spacedBy(6.dp),
             ) {
