@@ -18,11 +18,19 @@ object BarTabDimens {
     val CardPadding = 14.dp
 
     /**
-     * Size of the reserved slots either side of a screen header. Both are
-     * always laid out, empty or not, so the title sits in exactly the same
-     * place on every screen and never jumps when navigating.
+     * Touch target of the header's navigation slot. Always laid out, so the
+     * title sits in exactly the same place on every screen and never jumps
+     * when navigating. 48dp is Android's minimum accessible target.
      */
-    val HeaderSlot = 44.dp
+    val HeaderSlot = 48.dp
+
+    /**
+     * Glyph inside [HeaderSlot]. Larger than Material's stock 24dp because
+     * this app's screen titles are 27sp rather than the ~20sp a standard app
+     * bar assumes; shared by every nav control so the icon never changes size
+     * between screens.
+     */
+    val HeaderIcon = 28.dp
 
     /**
      * Header rows inset less than [ScreenHPadding] because the slot's touch

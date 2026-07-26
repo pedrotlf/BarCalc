@@ -53,18 +53,21 @@ fun ScreenHeader(
             .fillMaxWidth()
             .padding(
                 start = BarTabDimens.HeaderHPadding,
-                top = 18.dp,
+                top = 16.dp,
                 end = BarTabDimens.HeaderHPadding,
                 bottom = 4.dp,
             ),
         verticalAlignment = Alignment.Top,
     ) {
         HeaderSlot(leading)
-        // Nudged down so the title's first line centres on the slot buttons.
+        // Nudged down so the title's first line centres on the slot button:
+        // the slot's centre is 24dp down (half of HeaderSlot), the title's is
+        // ~16dp (half its line box), so 8dp of padding lines them up. The row's
+        // own top padding absorbs it, leaving the title's final y unchanged.
         Column(
             Modifier
                 .weight(1f)
-                .padding(top = 6.dp),
+                .padding(top = 8.dp),
         ) {
             Text(title, style = BarTabType.ScreenTitle)
             Text(subtitle, style = BarTabType.ScreenSubtitle, modifier = Modifier.padding(top = 4.dp))
@@ -91,7 +94,7 @@ fun HeaderMenuButton(onClick: () -> Unit) {
         contentDescription = stringResource(R.string.cd_menu),
         onClick = onClick,
         size = BarTabDimens.HeaderSlot,
-        iconSize = 24.dp,
+        iconSize = BarTabDimens.HeaderIcon,
         tint = BarTabColors.Neutral700,
     )
 }
@@ -104,7 +107,7 @@ fun HeaderBackButton(onClick: () -> Unit) {
         contentDescription = stringResource(R.string.cd_back),
         onClick = onClick,
         size = BarTabDimens.HeaderSlot,
-        iconSize = 22.dp,
+        iconSize = BarTabDimens.HeaderIcon,
         tint = BarTabColors.Neutral700,
     )
 }
@@ -117,7 +120,7 @@ fun HeaderCloseButton(onClick: () -> Unit) {
         contentDescription = stringResource(R.string.cd_close),
         onClick = onClick,
         size = BarTabDimens.HeaderSlot,
-        iconSize = 20.dp,
+        iconSize = BarTabDimens.HeaderIcon,
         tint = BarTabColors.Neutral700,
     )
 }
