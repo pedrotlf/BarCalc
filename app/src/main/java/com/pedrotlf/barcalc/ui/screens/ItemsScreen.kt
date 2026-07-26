@@ -147,8 +147,9 @@ private fun AddItemCard(state: TabUiState, onAction: (TabAction) -> Unit) {
         ) {
             PriceField(state, onAction, Modifier.weight(1f))
             Row(
+                modifier = Modifier.weight(1f),
                 verticalAlignment = Alignment.CenterVertically,
-                horizontalArrangement = Arrangement.spacedBy(BarTabDimens.ListGap),
+                horizontalArrangement = Arrangement.SpaceBetween,
             ) {
                 QtyStepper(
                     label = "${state.newItemQty}",
@@ -219,23 +220,24 @@ private fun ItemRow(item: TabItem, onAction: (TabAction) -> Unit) {
         horizontalArrangement = Arrangement.spacedBy(6.dp),
     ) {
         // Everything but the delete button, which stays pinned right. The
-        // stepper and total keep together and reflow onto a second row once the
-        // name field would be squeezed past legibility.
+        // stepper and total reflow onto a second row once the name field would
+        // be squeezed past legibility.
+        //
+        // SpaceBetween is what pushes the total to the end of that second row.
+        // On the first row the name field's weight has already absorbed the
+        // slack, so there is nothing left for the arrangement to spread and the
+        // children sit together — which is why the gaps between them come from
+        // each child's own end padding rather than from the arrangement.
         FlowRow(
             modifier = Modifier.weight(1f),
-            horizontalArrangement = Arrangement.spacedBy(6.dp),
+            horizontalArrangement = Arrangement.SpaceBetween,
             verticalArrangement = Arrangement.spacedBy(8.dp),
             itemVerticalAlignment = Alignment.CenterVertically,
         ) {
-            ItemNameField(item, onAction, Modifier.weight(1f))
-            ItemPriceField(item, onAction)
-            Row(
-                verticalAlignment = Alignment.CenterVertically,
-                horizontalArrangement = Arrangement.spacedBy(6.dp),
-            ) {
-                ItemQtyStepper(item, onAction)
-                ItemTotal(item)
-            }
+            ItemNameField(item, onAction, Modifier.weight(1f).padding(end = 6.dp))
+            ItemPriceField(item, onAction, Modifier.padding(end = 6.dp))
+            ItemQtyStepper(item, onAction, Modifier.padding(end = 6.dp))
+            ItemTotal(item)
         }
         GhostIconButton(
             icon = AppIcons.Trash,
@@ -266,11 +268,16 @@ private fun ItemNameField(
 
 /** Editable unit price — the box grows with the amount so large values aren't hidden. */
 @Composable
-private fun ItemPriceField(item: TabItem, onAction: (TabAction) -> Unit) {
+private fun ItemPriceField(
+    item: TabItem,
+    onAction: (TabAction) -> Unit,
+    modifier: Modifier = Modifier,
+) {
     val currency = LocalCurrencySymbol.current
     val priceStyle = BarTabType.Caption.copy(color = BarTabColors.Neutral700)
     Row(
-        Modifier
+        // Caller-supplied spacing sits outside the box, not inside it.
+        modifier
             .clip(RoundedCornerShape(BarTabDimens.RadiusSm))
             .background(BarTabColors.Bg)
             .padding(horizontal = 6.dp, vertical = 6.dp),
@@ -301,8 +308,13 @@ private fun ItemPriceField(item: TabItem, onAction: (TabAction) -> Unit) {
 }
 
 @Composable
-private fun ItemQtyStepper(item: TabItem, onAction: (TabAction) -> Unit) {
+private fun ItemQtyStepper(
+    item: TabItem,
+    onAction: (TabAction) -> Unit,
+    modifier: Modifier = Modifier,
+) {
     QtyStepper(
+        modifier = modifier,
         label = "${item.qty}",
         onDec = { onAction(TabAction.DecItemQty(item.id)) },
         onInc = { onAction(TabAction.IncItemQty(item.id)) },
