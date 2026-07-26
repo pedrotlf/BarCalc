@@ -233,7 +233,6 @@ private fun PriceField(
 
 @Composable
 private fun ItemRow(item: TabItem, onAction: (TabAction) -> Unit) {
-    val currency = LocalCurrencySymbol.current
     Row(
         Modifier
             .fillMaxWidth()
@@ -241,59 +240,47 @@ private fun ItemRow(item: TabItem, onAction: (TabAction) -> Unit) {
             .background(BarTabColors.Accent100)
             .roundedBorder(BarTabColors.Accent200, cornerRadius = BarTabDimens.RadiusLg)
             .padding(horizontal = 10.dp, vertical = 9.dp),
+        // Centred so the delete button sits mid-row whether the content takes
+        // one line or wraps to two.
         verticalAlignment = Alignment.CenterVertically,
         horizontalArrangement = Arrangement.spacedBy(6.dp),
     ) {
-        BareTextField(
-            value = item.name,
-            onValueChange = { onAction(TabAction.ItemNameChanged(item.id, it)) },
-            textStyle = BarTabType.RowTitle,
-            keyboardOptions = NameCapitalization,
-            modifier = Modifier.weight(1f),
-        )
-        // Editable price — the box grows with the amount so large values aren't hidden.
-        val priceStyle = BarTabType.Caption.copy(color = BarTabColors.Neutral700)
-        Row(
-            Modifier
-                .clip(RoundedCornerShape(BarTabDimens.RadiusSm))
-                .background(BarTabColors.Bg)
-                .padding(horizontal = 6.dp, vertical = 6.dp),
-            verticalAlignment = Alignment.CenterVertically,
-            horizontalArrangement = Arrangement.spacedBy(1.dp),
-        ) {
-            Text(currency, style = BarTabType.Caption)
-            Box(contentAlignment = Alignment.CenterStart) {
-                // Invisible sizer gives the field exactly the width of its text.
-                Text(
-                    SplitCalculator.formatMoney(item.priceCents, symbol = ""),
-                    style = priceStyle,
-                    maxLines = 1,
-                    softWrap = false,
-                    modifier = Modifier
-                        .widthIn(min = 26.dp)
-                        .padding(end = 2.dp) // caret room so the first digit never clips
-                        .alpha(0f),
-                )
-                MoneyField(
-                    cents = item.priceCents,
-                    onCentsChange = { onAction(TabAction.ItemPriceChanged(item.id, it)) },
-                    textStyle = priceStyle,
-                    modifier = Modifier.matchParentSize(),
-                )
+        // Everything but the delete button, which stays pinned right. Below the
+        // threshold the stepper and total drop to a second line, rather than
+        // squeezing the name field down to a few characters.
+        BoxWithConstraints(Modifier.weight(1f)) {
+            if (maxWidth < ItemRowSingleRowMinWidth) {
+                Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
+                    Row(
+                        Modifier.fillMaxWidth(),
+                        verticalAlignment = Alignment.CenterVertically,
+                        horizontalArrangement = Arrangement.spacedBy(6.dp),
+                    ) {
+                        ItemNameField(item, onAction, Modifier.weight(1f))
+                        ItemPriceField(item, onAction)
+                    }
+                    Row(
+                        Modifier.fillMaxWidth(),
+                        verticalAlignment = Alignment.CenterVertically,
+                        horizontalArrangement = Arrangement.SpaceBetween,
+                    ) {
+                        ItemQtyStepper(item, onAction)
+                        ItemTotal(item)
+                    }
+                }
+            } else {
+                Row(
+                    Modifier.fillMaxWidth(),
+                    verticalAlignment = Alignment.CenterVertically,
+                    horizontalArrangement = Arrangement.spacedBy(6.dp),
+                ) {
+                    ItemNameField(item, onAction, Modifier.weight(1f))
+                    ItemPriceField(item, onAction)
+                    ItemQtyStepper(item, onAction)
+                    ItemTotal(item)
+                }
             }
         }
-        QtyStepper(
-            label = "${item.qty}",
-            onDec = { onAction(TabAction.DecItemQty(item.id)) },
-            onInc = { onAction(TabAction.IncItemQty(item.id)) },
-            size = StepperSize.Compact,
-        )
-        Text(
-            SplitCalculator.formatMoney(item.priceCents * item.qty, currency),
-            style = BarTabType.Money,
-            textAlign = TextAlign.End,
-            modifier = Modifier.widthIn(min = 44.dp),
-        )
         GhostIconButton(
             icon = AppIcons.Trash,
             contentDescription = stringResource(R.string.cd_remove_item),
@@ -302,6 +289,84 @@ private fun ItemRow(item: TabItem, onAction: (TabAction) -> Unit) {
             iconSize = 14.dp,
         )
     }
+}
+
+/**
+ * Width an item row's content needs before the name, price, stepper and total
+ * fit on one line. Under it the name field would be squeezed to a few
+ * characters, since it is the only part that flexes.
+ */
+private val ItemRowSingleRowMinWidth = 280.dp
+
+@Composable
+private fun ItemNameField(
+    item: TabItem,
+    onAction: (TabAction) -> Unit,
+    modifier: Modifier = Modifier,
+) {
+    BareTextField(
+        value = item.name,
+        onValueChange = { onAction(TabAction.ItemNameChanged(item.id, it)) },
+        textStyle = BarTabType.RowTitle,
+        keyboardOptions = NameCapitalization,
+        modifier = modifier,
+    )
+}
+
+/** Editable unit price — the box grows with the amount so large values aren't hidden. */
+@Composable
+private fun ItemPriceField(item: TabItem, onAction: (TabAction) -> Unit) {
+    val currency = LocalCurrencySymbol.current
+    val priceStyle = BarTabType.Caption.copy(color = BarTabColors.Neutral700)
+    Row(
+        Modifier
+            .clip(RoundedCornerShape(BarTabDimens.RadiusSm))
+            .background(BarTabColors.Bg)
+            .padding(horizontal = 6.dp, vertical = 6.dp),
+        verticalAlignment = Alignment.CenterVertically,
+        horizontalArrangement = Arrangement.spacedBy(1.dp),
+    ) {
+        Text(currency, style = BarTabType.Caption)
+        Box(contentAlignment = Alignment.CenterStart) {
+            // Invisible sizer gives the field exactly the width of its text.
+            Text(
+                SplitCalculator.formatMoney(item.priceCents, symbol = ""),
+                style = priceStyle,
+                maxLines = 1,
+                softWrap = false,
+                modifier = Modifier
+                    .widthIn(min = 26.dp)
+                    .padding(end = 2.dp) // caret room so the first digit never clips
+                    .alpha(0f),
+            )
+            MoneyField(
+                cents = item.priceCents,
+                onCentsChange = { onAction(TabAction.ItemPriceChanged(item.id, it)) },
+                textStyle = priceStyle,
+                modifier = Modifier.matchParentSize(),
+            )
+        }
+    }
+}
+
+@Composable
+private fun ItemQtyStepper(item: TabItem, onAction: (TabAction) -> Unit) {
+    QtyStepper(
+        label = "${item.qty}",
+        onDec = { onAction(TabAction.DecItemQty(item.id)) },
+        onInc = { onAction(TabAction.IncItemQty(item.id)) },
+        size = StepperSize.Compact,
+    )
+}
+
+@Composable
+private fun ItemTotal(item: TabItem) {
+    Text(
+        SplitCalculator.formatMoney(item.priceCents * item.qty, LocalCurrencySymbol.current),
+        style = BarTabType.Money,
+        textAlign = TextAlign.End,
+        modifier = Modifier.widthIn(min = 44.dp),
+    )
 }
 
 @Preview(showBackground = true, backgroundColor = 0xFFF5EAD8, heightDp = 700)
