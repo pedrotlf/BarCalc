@@ -219,16 +219,14 @@ private fun ItemRow(item: TabItem, onAction: (TabAction) -> Unit) {
         verticalAlignment = Alignment.CenterVertically,
         horizontalArrangement = Arrangement.spacedBy(6.dp),
     ) {
-        // Everything but the delete button, which stays pinned right. The
-        // stepper and total share a Row so they count as one item here and
-        // always reflow together — the total can never strand on a row of its
-        // own while the stepper stays behind.
+        // Everything but the delete button, which stays pinned right so the
+        // row's centre alignment holds it mid-height across one line or two.
         //
-        // That also means the arrangement has a single item to place on the
-        // wrapped row, so End is what keeps the total flush with the rest of
-        // the column. The first row is unaffected: the name field's weight has
-        // already taken up the slack, leaving the arrangement nothing to move,
-        // which is why the gaps there come from each child's end padding.
+        // End keeps whatever wraps flush with the column above it. The first
+        // row is unaffected: the name field's weight has already taken up the
+        // slack, leaving the arrangement nothing to move — which is why the
+        // gaps there come from each child's end padding rather than from the
+        // arrangement itself.
         FlowRow(
             modifier = Modifier.weight(1f),
             horizontalArrangement = Arrangement.End,
