@@ -79,19 +79,15 @@ fun ItemsScreen(state: TabUiState, onAction: (TabAction) -> Unit) {
             }
         },
     ) {
+        // Root screen: the nav slot holds the drawer toggle rather than a back
+        // arrow, plus a shortcut to history — the most likely reason to open
+        // the menu from here is to start a new tab from an old one.
         ScreenHeader(
-            stringResource(R.string.items_title),
-            stringResource(R.string.items_subtitle),
-        ) {
-            GhostIconButton(
-                icon = AppIcons.Menu,
-                contentDescription = stringResource(R.string.cd_menu),
-                onClick = { onAction(TabAction.OpenDrawer) },
-                size = 44.dp,
-                iconSize = 24.dp,
-                tint = BarTabColors.Neutral600,
-            )
-        }
+            title = stringResource(R.string.items_title),
+            subtitle = stringResource(R.string.items_subtitle),
+            leading = { HeaderMenuButton { onAction(TabAction.OpenDrawer) } },
+            action = { HeaderHistoryButton { onAction(TabAction.ShowHistory) } },
+        )
         AddItemCard(state, onAction)
         if (state.items.isNotEmpty()) {
             Column(

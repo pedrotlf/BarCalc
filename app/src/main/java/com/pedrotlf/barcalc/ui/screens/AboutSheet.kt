@@ -16,7 +16,6 @@ import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
-import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.remember
@@ -202,11 +201,6 @@ fun AboutSheet(onAction: (TabAction) -> Unit) {
             }
         }
     }
-}
-
-@Composable
-private fun SectionDivider() {
-    HorizontalDivider(color = BarTabColors.Surface, thickness = 1.dp)
 }
 
 @Preview(showBackground = true, backgroundColor = 0xFFF5EAD8, heightDp = 720)
