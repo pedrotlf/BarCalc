@@ -79,20 +79,11 @@ fun ItemsScreen(state: TabUiState, onAction: (TabAction) -> Unit) {
             }
         },
     ) {
-        // First screen: nothing to go back to, so the leading slot stays empty.
+        // Root screen: the nav slot holds the drawer toggle rather than a back arrow.
         ScreenHeader(
             title = stringResource(R.string.items_title),
             subtitle = stringResource(R.string.items_subtitle),
-            action = {
-                GhostIconButton(
-                    icon = AppIcons.Menu,
-                    contentDescription = stringResource(R.string.cd_menu),
-                    onClick = { onAction(TabAction.OpenDrawer) },
-                    size = BarTabDimens.HeaderSlot,
-                    iconSize = 24.dp,
-                    tint = BarTabColors.Neutral600,
-                )
-            },
+            leading = { HeaderMenuButton { onAction(TabAction.OpenDrawer) } },
         )
         AddItemCard(state, onAction)
         if (state.items.isNotEmpty()) {

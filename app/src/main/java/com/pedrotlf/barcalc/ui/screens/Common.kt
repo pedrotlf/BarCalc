@@ -36,18 +36,17 @@ import com.pedrotlf.barcalc.ui.theme.BarTabType
 /**
  * Title + subtitle block at the top of every screen.
  *
- * [leading] holds a back/close button and *always* occupies its space, empty
- * or not, so the title starts at the same x on every screen and never jumps
- * when navigating. [action] (a screen-level control) is only laid out when
- * present — it sits after the flexible title column, so leaving it out just
- * gives long subtitles more room rather than moving anything.
+ * [leading] is the navigation slot, and always occupies its space so the
+ * title starts at the same x on every screen and never jumps when
+ * navigating. Following the usual top-bar convention, it holds whichever
+ * control that screen needs: the menu on the root screen, a back arrow
+ * deeper in the wizard, an X on screens that dismiss.
  */
 @Composable
 fun ScreenHeader(
     title: String,
     subtitle: String,
     leading: (@Composable () -> Unit)? = null,
-    action: (@Composable () -> Unit)? = null,
 ) {
     Row(
         Modifier
@@ -70,7 +69,6 @@ fun ScreenHeader(
             Text(title, style = BarTabType.ScreenTitle)
             Text(subtitle, style = BarTabType.ScreenSubtitle, modifier = Modifier.padding(top = 4.dp))
         }
-        action?.invoke()
     }
 }
 
@@ -83,6 +81,19 @@ private fun HeaderSlot(content: (@Composable () -> Unit)?) {
     ) {
         content?.invoke()
     }
+}
+
+/** Drawer toggle, for the root screen that has nothing to go back to. */
+@Composable
+fun HeaderMenuButton(onClick: () -> Unit) {
+    GhostIconButton(
+        icon = AppIcons.Menu,
+        contentDescription = stringResource(R.string.cd_menu),
+        onClick = onClick,
+        size = BarTabDimens.HeaderSlot,
+        iconSize = 24.dp,
+        tint = BarTabColors.Neutral700,
+    )
 }
 
 /** Back arrow for screens that step backwards through the wizard. */
