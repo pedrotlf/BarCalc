@@ -96,8 +96,18 @@ fun ClaimSheet(
                 ) { /* swallow clicks so the scrim doesn't close */ },
         ) {
             SheetHeader(person, personIndex, onAction)
+            // Numbered chips only appear for items with more than one unit; a
+            // tab without any shows nothing but checkboxes, so the wording has
+            // to follow the controls actually on screen.
+            val hasMultiUnitItems = state.items.any { it.qty > 1 }
             Text(
-                stringResource(R.string.claim_instructions),
+                stringResource(
+                    if (hasMultiUnitItems) {
+                        R.string.claim_instructions_units
+                    } else {
+                        R.string.claim_instructions_items
+                    }
+                ),
                 style = BarTabType.Body.copy(fontSize = 11.5.sp, color = BarTabColors.Neutral600),
                 modifier = Modifier.padding(
                     start = 16.dp, top = 10.dp, end = 16.dp, bottom = 6.dp
