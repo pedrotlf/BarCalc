@@ -3,7 +3,6 @@ package com.pedrotlf.barcalc.ui.screens
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.BoxWithConstraints
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.defaultMinSize
@@ -31,6 +30,7 @@ import com.pedrotlf.barcalc.ui.TabAction
 import com.pedrotlf.barcalc.ui.TabUiState
 import com.pedrotlf.barcalc.ui.components.AppIcons
 import com.pedrotlf.barcalc.ui.components.BareTextField
+import com.pedrotlf.barcalc.ui.components.FlexibleFlowRow
 import com.pedrotlf.barcalc.ui.components.GhostIconButton
 import com.pedrotlf.barcalc.ui.components.LocalCurrencySymbol
 import com.pedrotlf.barcalc.ui.components.MoneyField
@@ -136,72 +136,44 @@ private fun AddItemCard(state: TabUiState, onAction: (TabAction) -> Unit) {
             keyboardOptions = NameCapitalization,
             modifier = Modifier.fillMaxWidth(),
         )
-        // The price field, quantity stepper and add button only share a row
-        // when there's room. Below the threshold the stepper and button drop to
-        // their own row, because otherwise the price — the only child with a
-        // weight — is what gets squeezed, down to nothing on small screens.
-        BoxWithConstraints {
-            if (maxWidth < AddCardSingleRowMinWidth) {
-                Column(verticalArrangement = Arrangement.spacedBy(BarTabDimens.ListGap)) {
-                    PriceField(state, onAction, Modifier.fillMaxWidth())
-                    Row(
-                        Modifier.fillMaxWidth(),
-                        verticalAlignment = Alignment.CenterVertically,
-                        horizontalArrangement = Arrangement.SpaceBetween,
-                    ) {
-                        QtyStepper(
-                            label = "${state.newItemQty}",
-                            onDec = { onAction(TabAction.DecNewQty) },
-                            onInc = { onAction(TabAction.IncNewQty) },
-                        )
-                        PrimaryIconButton(
-                            icon = AppIcons.Plus,
-                            contentDescription = stringResource(R.string.cd_add_item),
-                            onClick = { onAction(TabAction.AddItem) },
-                            enabled = state.addItemEnabled,
-                        )
-                    }
-                }
-            } else {
-                Row(
-                    verticalAlignment = Alignment.CenterVertically,
-                    horizontalArrangement = Arrangement.spacedBy(BarTabDimens.ListGap),
-                ) {
-                    PriceField(state, onAction, Modifier.weight(1f))
-                    QtyStepper(
-                        label = "${state.newItemQty}",
-                        onDec = { onAction(TabAction.DecNewQty) },
-                        onInc = { onAction(TabAction.IncNewQty) },
-                    )
-                    PrimaryIconButton(
-                        icon = AppIcons.Plus,
-                        contentDescription = stringResource(R.string.cd_add_item),
-                        onClick = { onAction(TabAction.AddItem) },
-                        enabled = state.addItemEnabled,
-                    )
-                }
+        // The price field stretches to fill its row; the stepper and add button
+        // stay together and drop to a row of their own once they stop fitting
+        // beside it. Where that happens is decided by the price field's own
+        // minimum width, so it adapts to the locale's currency symbol and
+        // suffix rather than to a screen-size guess.
+        FlexibleFlowRow(
+            horizontalGap = BarTabDimens.ListGap,
+            verticalGap = BarTabDimens.ListGap,
+        ) {
+            PriceField(state, onAction)
+            Row(
+                verticalAlignment = Alignment.CenterVertically,
+                horizontalArrangement = Arrangement.spacedBy(BarTabDimens.ListGap),
+            ) {
+                QtyStepper(
+                    label = "${state.newItemQty}",
+                    onDec = { onAction(TabAction.DecNewQty) },
+                    onInc = { onAction(TabAction.IncNewQty) },
+                )
+                PrimaryIconButton(
+                    icon = AppIcons.Plus,
+                    contentDescription = stringResource(R.string.cd_add_item),
+                    onClick = { onAction(TabAction.AddItem) },
+                    enabled = state.addItemEnabled,
+                )
             }
         }
     }
 }
 
-/**
- * Width the add card needs before the price, stepper and add button fit on one
- * row: the stepper and button take ~150dp of fixed width between them, leaving
- * the rest for a price box that still has to hold the currency symbol and the
- * "each" suffix around its input.
- */
-private val AddCardSingleRowMinWidth = 320.dp
-
 /** Price input on the app background: "<symbol> <amount> each". */
 @Composable
-private fun PriceField(
-    state: TabUiState,
-    onAction: (TabAction) -> Unit,
-    modifier: Modifier = Modifier,
-) {
+private fun PriceField(state: TabUiState, onAction: (TabAction) -> Unit) {
     Row(
-        modifier
+        Modifier
+            // The floor that decides when the row wraps: below this the input
+            // stops being legible, so the controls beside it move down instead.
+            .widthIn(min = 150.dp)
             .clip(RoundedCornerShape(BarTabDimens.RadiusMd))
             .background(BarTabColors.Bg)
             .padding(horizontal = 10.dp)
@@ -219,9 +191,6 @@ private fun PriceField(
             textStyle = BarTabType.Body.copy(fontSize = 15.sp),
             modifier = Modifier
                 .weight(1f)
-                // Floor, so a long amount or a wide locale can never collapse
-                // the input to a sliver again.
-                .widthIn(min = 56.dp)
                 .padding(horizontal = 4.dp, vertical = 10.dp),
         )
         Text(
@@ -245,40 +214,23 @@ private fun ItemRow(item: TabItem, onAction: (TabAction) -> Unit) {
         verticalAlignment = Alignment.CenterVertically,
         horizontalArrangement = Arrangement.spacedBy(6.dp),
     ) {
-        // Everything but the delete button, which stays pinned right. Below the
-        // threshold the stepper and total drop to a second line, rather than
-        // squeezing the name field down to a few characters.
-        BoxWithConstraints(Modifier.weight(1f)) {
-            if (maxWidth < ItemRowSingleRowMinWidth) {
-                Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
-                    Row(
-                        Modifier.fillMaxWidth(),
-                        verticalAlignment = Alignment.CenterVertically,
-                        horizontalArrangement = Arrangement.spacedBy(6.dp),
-                    ) {
-                        ItemNameField(item, onAction, Modifier.weight(1f))
-                        ItemPriceField(item, onAction)
-                    }
-                    Row(
-                        Modifier.fillMaxWidth(),
-                        verticalAlignment = Alignment.CenterVertically,
-                        horizontalArrangement = Arrangement.SpaceBetween,
-                    ) {
-                        ItemQtyStepper(item, onAction)
-                        ItemTotal(item)
-                    }
-                }
-            } else {
-                Row(
-                    Modifier.fillMaxWidth(),
-                    verticalAlignment = Alignment.CenterVertically,
-                    horizontalArrangement = Arrangement.spacedBy(6.dp),
-                ) {
-                    ItemNameField(item, onAction, Modifier.weight(1f))
-                    ItemPriceField(item, onAction)
-                    ItemQtyStepper(item, onAction)
-                    ItemTotal(item)
-                }
+        // Everything but the delete button, which stays pinned right. The name
+        // field stretches to fill its row; the stepper and total keep together
+        // and drop to a second row once the name would be squeezed past
+        // legibility.
+        FlexibleFlowRow(
+            modifier = Modifier.weight(1f),
+            horizontalGap = 6.dp,
+            verticalGap = 8.dp,
+        ) {
+            ItemNameField(item, onAction)
+            ItemPriceField(item, onAction)
+            Row(
+                verticalAlignment = Alignment.CenterVertically,
+                horizontalArrangement = Arrangement.spacedBy(6.dp),
+            ) {
+                ItemQtyStepper(item, onAction)
+                ItemTotal(item)
             }
         }
         GhostIconButton(
@@ -291,25 +243,16 @@ private fun ItemRow(item: TabItem, onAction: (TabAction) -> Unit) {
     }
 }
 
-/**
- * Width an item row's content needs before the name, price, stepper and total
- * fit on one line. Under it the name field would be squeezed to a few
- * characters, since it is the only part that flexes.
- */
-private val ItemRowSingleRowMinWidth = 280.dp
-
 @Composable
-private fun ItemNameField(
-    item: TabItem,
-    onAction: (TabAction) -> Unit,
-    modifier: Modifier = Modifier,
-) {
+private fun ItemNameField(item: TabItem, onAction: (TabAction) -> Unit) {
     BareTextField(
         value = item.name,
         onValueChange = { onAction(TabAction.ItemNameChanged(item.id, it)) },
         textStyle = BarTabType.RowTitle,
         keyboardOptions = NameCapitalization,
-        modifier = modifier,
+        // The floor that decides when the row wraps: once the name can't stay
+        // this wide, the stepper and total move to a row of their own.
+        modifier = Modifier.widthIn(min = 96.dp),
     )
 }
 
