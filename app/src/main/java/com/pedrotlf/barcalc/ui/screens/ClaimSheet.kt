@@ -99,7 +99,9 @@ fun ClaimSheet(
             Text(
                 stringResource(R.string.claim_instructions),
                 style = BarTabType.Body.copy(fontSize = 11.5.sp, color = BarTabColors.Neutral600),
-                modifier = Modifier.padding(start = 16.dp, top = 10.dp, end = 16.dp),
+                modifier = Modifier.padding(
+                    start = 16.dp, top = 10.dp, end = 16.dp, bottom = 6.dp
+                ),
             )
             Column(
                 Modifier

@@ -3,6 +3,7 @@ package com.pedrotlf.barcalc.ui.screens
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.BoxWithConstraints
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.defaultMinSize
@@ -135,50 +136,98 @@ private fun AddItemCard(state: TabUiState, onAction: (TabAction) -> Unit) {
             keyboardOptions = NameCapitalization,
             modifier = Modifier.fillMaxWidth(),
         )
-        Row(
-            verticalAlignment = Alignment.CenterVertically,
-            horizontalArrangement = Arrangement.spacedBy(BarTabDimens.ListGap),
-        ) {
-            // $ price field on the app background
-            Row(
-                Modifier
-                    .weight(1f)
-                    .clip(RoundedCornerShape(BarTabDimens.RadiusMd))
-                    .background(BarTabColors.Bg)
-                    .padding(horizontal = 10.dp)
-                    .defaultMinSize(minHeight = 44.dp),
-                verticalAlignment = Alignment.CenterVertically,
-                horizontalArrangement = Arrangement.spacedBy(4.dp),
-            ) {
-                Text(
-                    LocalCurrencySymbol.current,
-                    style = BarTabType.Body.copy(fontSize = 15.sp, color = BarTabColors.Neutral700),
-                )
-                MoneyField(
-                    cents = state.newItemPriceCents,
-                    onCentsChange = { onAction(TabAction.NewItemPriceChanged(it)) },
-                    textStyle = BarTabType.Body.copy(fontSize = 15.sp),
-                    modifier = Modifier
-                        .weight(1f)
-                        .padding(horizontal = 4.dp, vertical = 10.dp),
-                )
-                Text(
-                    stringResource(R.string.price_each_suffix),
-                    style = BarTabType.Body.copy(fontSize = 13.sp, color = BarTabColors.Neutral600),
-                )
+        // The price field, quantity stepper and add button only share a row
+        // when there's room. Below the threshold the stepper and button drop to
+        // their own row, because otherwise the price — the only child with a
+        // weight — is what gets squeezed, down to nothing on small screens.
+        BoxWithConstraints {
+            if (maxWidth < AddCardSingleRowMinWidth) {
+                Column(verticalArrangement = Arrangement.spacedBy(BarTabDimens.ListGap)) {
+                    PriceField(state, onAction, Modifier.fillMaxWidth())
+                    Row(
+                        Modifier.fillMaxWidth(),
+                        verticalAlignment = Alignment.CenterVertically,
+                        horizontalArrangement = Arrangement.SpaceBetween,
+                    ) {
+                        QtyStepper(
+                            label = "${state.newItemQty}",
+                            onDec = { onAction(TabAction.DecNewQty) },
+                            onInc = { onAction(TabAction.IncNewQty) },
+                        )
+                        PrimaryIconButton(
+                            icon = AppIcons.Plus,
+                            contentDescription = stringResource(R.string.cd_add_item),
+                            onClick = { onAction(TabAction.AddItem) },
+                            enabled = state.addItemEnabled,
+                        )
+                    }
+                }
+            } else {
+                Row(
+                    verticalAlignment = Alignment.CenterVertically,
+                    horizontalArrangement = Arrangement.spacedBy(BarTabDimens.ListGap),
+                ) {
+                    PriceField(state, onAction, Modifier.weight(1f))
+                    QtyStepper(
+                        label = "${state.newItemQty}",
+                        onDec = { onAction(TabAction.DecNewQty) },
+                        onInc = { onAction(TabAction.IncNewQty) },
+                    )
+                    PrimaryIconButton(
+                        icon = AppIcons.Plus,
+                        contentDescription = stringResource(R.string.cd_add_item),
+                        onClick = { onAction(TabAction.AddItem) },
+                        enabled = state.addItemEnabled,
+                    )
+                }
             }
-            QtyStepper(
-                label = "${state.newItemQty}",
-                onDec = { onAction(TabAction.DecNewQty) },
-                onInc = { onAction(TabAction.IncNewQty) },
-            )
-            PrimaryIconButton(
-                icon = AppIcons.Plus,
-                contentDescription = stringResource(R.string.cd_add_item),
-                onClick = { onAction(TabAction.AddItem) },
-                enabled = state.addItemEnabled,
-            )
         }
+    }
+}
+
+/**
+ * Width the add card needs before the price, stepper and add button fit on one
+ * row: the stepper and button take ~150dp of fixed width between them, leaving
+ * the rest for a price box that still has to hold the currency symbol and the
+ * "each" suffix around its input.
+ */
+private val AddCardSingleRowMinWidth = 320.dp
+
+/** Price input on the app background: "<symbol> <amount> each". */
+@Composable
+private fun PriceField(
+    state: TabUiState,
+    onAction: (TabAction) -> Unit,
+    modifier: Modifier = Modifier,
+) {
+    Row(
+        modifier
+            .clip(RoundedCornerShape(BarTabDimens.RadiusMd))
+            .background(BarTabColors.Bg)
+            .padding(horizontal = 10.dp)
+            .defaultMinSize(minHeight = 44.dp),
+        verticalAlignment = Alignment.CenterVertically,
+        horizontalArrangement = Arrangement.spacedBy(4.dp),
+    ) {
+        Text(
+            LocalCurrencySymbol.current,
+            style = BarTabType.Body.copy(fontSize = 15.sp, color = BarTabColors.Neutral700),
+        )
+        MoneyField(
+            cents = state.newItemPriceCents,
+            onCentsChange = { onAction(TabAction.NewItemPriceChanged(it)) },
+            textStyle = BarTabType.Body.copy(fontSize = 15.sp),
+            modifier = Modifier
+                .weight(1f)
+                // Floor, so a long amount or a wide locale can never collapse
+                // the input to a sliver again.
+                .widthIn(min = 56.dp)
+                .padding(horizontal = 4.dp, vertical = 10.dp),
+        )
+        Text(
+            stringResource(R.string.price_each_suffix),
+            style = BarTabType.Body.copy(fontSize = 13.sp, color = BarTabColors.Neutral600),
+        )
     }
 }
 
@@ -258,6 +307,21 @@ private fun ItemRow(item: TabItem, onAction: (TabAction) -> Unit) {
 @Preview(showBackground = true, backgroundColor = 0xFFF5EAD8, heightDp = 700)
 @Composable
 private fun ItemsScreenPreview() {
+    BarCalcTheme {
+        ItemsScreen(state = previewTabState(), onAction = {})
+    }
+}
+
+/** Narrow enough that the add card drops its stepper and button to a second row. */
+@Preview(
+    name = "Narrow — stacked add card",
+    showBackground = true,
+    backgroundColor = 0xFFF5EAD8,
+    heightDp = 700,
+    widthDp = 320,
+)
+@Composable
+private fun ItemsScreenNarrowPreview() {
     BarCalcTheme {
         ItemsScreen(state = previewTabState(), onAction = {})
     }
