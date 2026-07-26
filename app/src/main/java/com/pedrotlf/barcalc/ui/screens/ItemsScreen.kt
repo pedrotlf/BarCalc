@@ -5,6 +5,7 @@ import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.FlowRow
 import androidx.compose.foundation.layout.defaultMinSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
@@ -30,7 +31,6 @@ import com.pedrotlf.barcalc.ui.TabAction
 import com.pedrotlf.barcalc.ui.TabUiState
 import com.pedrotlf.barcalc.ui.components.AppIcons
 import com.pedrotlf.barcalc.ui.components.BareTextField
-import com.pedrotlf.barcalc.ui.components.FlexibleFlowRow
 import com.pedrotlf.barcalc.ui.components.GhostIconButton
 import com.pedrotlf.barcalc.ui.components.LocalCurrencySymbol
 import com.pedrotlf.barcalc.ui.components.MoneyField
@@ -136,16 +136,16 @@ private fun AddItemCard(state: TabUiState, onAction: (TabAction) -> Unit) {
             keyboardOptions = NameCapitalization,
             modifier = Modifier.fillMaxWidth(),
         )
-        // The price field stretches to fill its row; the stepper and add button
-        // stay together and drop to a row of their own once they stop fitting
-        // beside it. Where that happens is decided by the price field's own
-        // minimum width, so it adapts to the locale's currency symbol and
-        // suffix rather than to a screen-size guess.
-        FlexibleFlowRow(
-            horizontalGap = BarTabDimens.ListGap,
-            verticalGap = BarTabDimens.ListGap,
+        // The stepper and add button stay together and reflow onto their own
+        // row once they stop fitting beside the price field. The price field's
+        // own minimum width decides when that happens, so it follows the
+        // locale's currency symbol and suffix instead of a screen-size guess.
+        FlowRow(
+            horizontalArrangement = Arrangement.spacedBy(BarTabDimens.ListGap),
+            verticalArrangement = Arrangement.spacedBy(BarTabDimens.ListGap),
+            itemVerticalAlignment = Alignment.CenterVertically,
         ) {
-            PriceField(state, onAction)
+            PriceField(state, onAction, Modifier.weight(1f))
             Row(
                 verticalAlignment = Alignment.CenterVertically,
                 horizontalArrangement = Arrangement.spacedBy(BarTabDimens.ListGap),
@@ -168,11 +168,15 @@ private fun AddItemCard(state: TabUiState, onAction: (TabAction) -> Unit) {
 
 /** Price input on the app background: "<symbol> <amount> each". */
 @Composable
-private fun PriceField(state: TabUiState, onAction: (TabAction) -> Unit) {
+private fun PriceField(
+    state: TabUiState,
+    onAction: (TabAction) -> Unit,
+    modifier: Modifier = Modifier,
+) {
     Row(
-        Modifier
-            // The floor that decides when the row wraps: below this the input
-            // stops being legible, so the controls beside it move down instead.
+        modifier
+            // Legibility floor, and so what makes the row reflow: once the
+            // field can't stay this wide the controls beside it move down.
             .widthIn(min = 150.dp)
             .clip(RoundedCornerShape(BarTabDimens.RadiusMd))
             .background(BarTabColors.Bg)
@@ -214,16 +218,16 @@ private fun ItemRow(item: TabItem, onAction: (TabAction) -> Unit) {
         verticalAlignment = Alignment.CenterVertically,
         horizontalArrangement = Arrangement.spacedBy(6.dp),
     ) {
-        // Everything but the delete button, which stays pinned right. The name
-        // field stretches to fill its row; the stepper and total keep together
-        // and drop to a second row once the name would be squeezed past
-        // legibility.
-        FlexibleFlowRow(
+        // Everything but the delete button, which stays pinned right. The
+        // stepper and total keep together and reflow onto a second row once the
+        // name field would be squeezed past legibility.
+        FlowRow(
             modifier = Modifier.weight(1f),
-            horizontalGap = 6.dp,
-            verticalGap = 8.dp,
+            horizontalArrangement = Arrangement.spacedBy(6.dp),
+            verticalArrangement = Arrangement.spacedBy(8.dp),
+            itemVerticalAlignment = Alignment.CenterVertically,
         ) {
-            ItemNameField(item, onAction)
+            ItemNameField(item, onAction, Modifier.weight(1f))
             ItemPriceField(item, onAction)
             Row(
                 verticalAlignment = Alignment.CenterVertically,
@@ -244,15 +248,19 @@ private fun ItemRow(item: TabItem, onAction: (TabAction) -> Unit) {
 }
 
 @Composable
-private fun ItemNameField(item: TabItem, onAction: (TabAction) -> Unit) {
+private fun ItemNameField(
+    item: TabItem,
+    onAction: (TabAction) -> Unit,
+    modifier: Modifier = Modifier,
+) {
     BareTextField(
         value = item.name,
         onValueChange = { onAction(TabAction.ItemNameChanged(item.id, it)) },
         textStyle = BarTabType.RowTitle,
         keyboardOptions = NameCapitalization,
-        // The floor that decides when the row wraps: once the name can't stay
-        // this wide, the stepper and total move to a row of their own.
-        modifier = Modifier.widthIn(min = 96.dp),
+        // Legibility floor, and so what makes the row reflow: once the name
+        // can't stay this wide, the stepper and total move to a row of their own.
+        modifier = modifier.widthIn(min = 96.dp),
     )
 }
 
