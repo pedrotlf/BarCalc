@@ -39,10 +39,8 @@
     </plurals>
 
     <!-- Claim sheet -->
-    <!-- Shown when at least one item has more than one unit, so numbered chips are on screen. -->
-    <string name="claim_instructions_units">Tap a number to join that unit — sharing one with someone splits its cost.</string>
-    <!-- Shown when every item is a single unit, so only checkboxes are on screen. -->
-    <string name="claim_instructions_items">Tick what this person had — sharing an item with someone splits its cost.</string>
+    <!-- Covers both controls in the sheet: checkboxes for single-unit items, numbered chips for the rest. -->
+    <string name="claim_instructions">Tap what this person had — numbers claim individual units, and sharing one splits its cost.</string>
     <!-- Chip that claims/releases all units of an item at once -->
     <string name="claim_all">All</string>
     <string name="unit_price_each">%1$s each</string>
