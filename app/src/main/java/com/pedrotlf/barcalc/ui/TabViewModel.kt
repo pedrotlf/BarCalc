@@ -7,6 +7,7 @@ import com.pedrotlf.barcalc.data.history.HistoryStore
 import com.pedrotlf.barcalc.data.receipt.ReceiptTextRecognizer
 import com.pedrotlf.barcalc.domain.Person
 import com.pedrotlf.barcalc.domain.SplitCalculator
+import com.pedrotlf.barcalc.domain.receipt.ReceiptParser
 import com.pedrotlf.barcalc.domain.TabItem
 import kotlinx.coroutines.FlowPreview
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -153,7 +154,7 @@ class TabViewModel(
                 it.copy(
                     scanning = false,
                     scanResult = result.fold(
-                        onSuccess = { text -> ScanResult.Text(text) },
+                        onSuccess = { text -> ScanResult.Read(ReceiptParser.parse(text), text) },
                         onFailure = { ScanResult.Failed },
                     ),
                 )

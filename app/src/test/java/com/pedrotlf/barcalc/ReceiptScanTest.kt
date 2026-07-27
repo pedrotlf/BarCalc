@@ -1,6 +1,7 @@
 package com.pedrotlf.barcalc
 
 import com.pedrotlf.barcalc.data.receipt.ReceiptTextRecognizer
+import com.pedrotlf.barcalc.domain.receipt.ParsedItem
 import com.pedrotlf.barcalc.ui.ScanResult
 import com.pedrotlf.barcalc.ui.TabAction
 import com.pedrotlf.barcalc.ui.TabViewModel
@@ -43,7 +44,9 @@ class ReceiptScanTest {
         vm.onAction(TabAction.ReceiptCaptured("content://scan/1.jpg"))
 
         assertEquals(listOf("content://scan/1.jpg"), recognizer.seen)
-        assertEquals(ScanResult.Text("2x Chopp  24,00"), vm.uiState.value.scanResult)
+        val read = vm.uiState.value.scanResult as ScanResult.Read
+        assertEquals("2x Chopp  24,00", read.rawText)
+        assertEquals(listOf(ParsedItem("Chopp", 1200L, 2)), read.items)
         assertFalse(vm.uiState.value.scanning)
     }
 
@@ -65,7 +68,9 @@ class ReceiptScanTest {
 
         vm.onAction(TabAction.ReceiptCaptured("content://scan/blank.jpg"))
 
-        assertEquals(ScanResult.Text(""), vm.uiState.value.scanResult)
+        val read = vm.uiState.value.scanResult as ScanResult.Read
+        assertEquals("", read.rawText)
+        assertTrue(read.items.isEmpty())
     }
 
     @Test
