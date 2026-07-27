@@ -62,8 +62,19 @@ sealed interface TabAction {
     /** The scanner was dismissed or couldn't start. */
     data object ScanCancelled : TabAction
 
-    /** Close the recognised-text view. */
+    /** Close the review, discarding everything that was scanned. */
     data object DismissScanResult : TabAction
+
+    // ── Checking over a scan ───────────────────────────────────────────────
+    /** Keep or drop a scanned line. */
+    data class ToggleScanDraft(val id: Int) : TabAction
+    data class ScanDraftNameChanged(val id: Int, val name: String) : TabAction
+    data class ScanDraftPriceChanged(val id: Int, val cents: Long) : TabAction
+    data class IncScanDraftQty(val id: Int) : TabAction
+    data class DecScanDraftQty(val id: Int) : TabAction
+
+    /** Add the kept lines to the tab and close the review. */
+    data object ConfirmScannedItems : TabAction
 
     // ── Drawer ─────────────────────────────────────────────────────────────
     data object OpenDrawer : TabAction
@@ -121,6 +132,8 @@ val TabAction.dismissesKeyboard: Boolean
         // Sheets and dialogs that cover the screen.
         TabAction.RequestReset,
         TabAction.RequestClearHistory,
+        // Closes the review and lands back on the items screen.
+        TabAction.ConfirmScannedItems,
         is TabAction.OpenPerson,
         is TabAction.RequestDuplicate,
         is TabAction.RequestRename,

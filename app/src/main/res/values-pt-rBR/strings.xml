@@ -54,8 +54,14 @@
 
     <!-- Escanear a comanda -->
     <string name="scan_tab">Escanear a comanda</string>
-    <string name="scan_result_title">Comanda escaneada</string>
-    <string name="scan_result_subtitle">Isto é o que a câmera leu. Em breve dá para virar itens automaticamente.</string>
+    <string name="scan_review_title">Confira a leitura</string>
+    <string name="scan_review_subtitle">Corrija o que veio errado e depois adicione à sua comanda.</string>
+    <string name="scan_review_warning">A leitura pode errar. Confira cada nome e preço na comanda e desmarque o que não deve entrar — o total abaixo deve bater com o da comanda.</string>
+    <string name="scan_add_items">Adicionar à comanda</string>
+    <plurals name="scan_selected_count" tools:ignore="MissingQuantity">
+        <item quantity="one">%1$d item selecionado</item>
+        <item quantity="other">%1$d itens selecionados</item>
+    </plurals>
     <string name="scan_reading">Lendo a comanda…</string>
     <string name="scan_failed">Não deu para ler essa foto. Tente de novo com a comanda esticada e bem iluminada.</string>
     <string name="scan_empty">Nenhum texto encontrado nessa foto. Tente de novo com a comanda esticada e bem iluminada.</string>
