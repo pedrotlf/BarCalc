@@ -17,6 +17,17 @@
 -keepattributes SourceFile,LineNumberTable
 -renamesourcefileattribute SourceFile
 
+# ── ML Kit (tab scanning) ────────────────────────────────────────────────────
+# The ML Kit artifacts ship their own consumer rules, so these are a backstop
+# for the parts reached reflectively: the bundled text-recognition model's
+# native entry points, and the options classes Play services reads when it
+# hands back a scanned page. Getting this wrong only shows up in release
+# builds, which is exactly where scanning would then be broken.
+-keep class com.google.mlkit.vision.text.** { *; }
+-keep class com.google.mlkit.vision.documentscanner.** { *; }
+-keep class com.google.android.gms.internal.mlkit_vision_text** { *; }
+-dontwarn com.google.mlkit.**
+
 # ── kotlinx.serialization ─────────────────────────────────────────────────────
 # The runtime ships consumer rules, but we keep our own @Serializable models and
 # their generated serializers explicitly: a stripped serializer would silently

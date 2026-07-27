@@ -52,6 +52,14 @@
     <string name="cd_close">Fechar</string>
     <string name="cd_back">Voltar</string>
 
+    <!-- Escanear a comanda -->
+    <string name="scan_tab">Escanear a comanda</string>
+    <string name="scan_result_title">Comanda escaneada</string>
+    <string name="scan_result_subtitle">Isto é o que a câmera leu. Em breve dá para virar itens automaticamente.</string>
+    <string name="scan_reading">Lendo a comanda…</string>
+    <string name="scan_failed">Não deu para ler essa foto. Tente de novo com a comanda esticada e bem iluminada.</string>
+    <string name="scan_empty">Nenhum texto encontrado nessa foto. Tente de novo com a comanda esticada e bem iluminada.</string>
+
     <!-- Drawer -->
     <string name="cd_menu">Menu</string>
     <string name="menu_title">Menu</string>

@@ -45,6 +45,10 @@ data class TabUiState(
     val renameDraft: String = "",
     val pendingDeleteEntryId: Long? = null,
     val showClearHistoryConfirm: Boolean = false,
+    /** True while a captured photo is being read. */
+    val scanning: Boolean = false,
+    /** Text recognised from the last scan, or null when nothing is showing. */
+    val scanResult: ScanResult? = null,
 ) {
     val items: List<TabItem> get() = session.items
     val people: List<Person> get() = session.people
@@ -65,6 +69,19 @@ data class TabUiState(
 
     /** Whether there's anything worth warning about before replacing the tab. */
     val hasWorkInProgress: Boolean get() = items.isNotEmpty() || people.isNotEmpty()
+}
+
+/**
+ * Outcome of reading a photo of the tab. Phase one stops here — the text is
+ * shown as it came back, and turning it into items comes later.
+ */
+sealed interface ScanResult {
+
+    /** Text was read; [text] is blank when the photo held none we could use. */
+    data class Text(val text: String) : ScanResult
+
+    /** Reading failed outright, e.g. the image couldn't be opened. */
+    data object Failed : ScanResult
 }
 
 /** Design defaults, hardcoded per the design's props. */

@@ -39,6 +39,8 @@ import com.pedrotlf.barcalc.ui.components.PillTextField
 import com.pedrotlf.barcalc.ui.components.PrimaryButton
 import com.pedrotlf.barcalc.ui.components.PrimaryIconButton
 import com.pedrotlf.barcalc.ui.components.QtyStepper
+import com.pedrotlf.barcalc.ui.components.SecondaryButton
+import com.pedrotlf.barcalc.ui.components.rememberTabScanLauncher
 import com.pedrotlf.barcalc.ui.components.StepperSize
 import com.pedrotlf.barcalc.ui.components.dashedBorder
 import com.pedrotlf.barcalc.ui.components.roundedBorder
@@ -129,6 +131,14 @@ private fun AddItemCard(state: TabUiState, onAction: (TabAction) -> Unit) {
             .padding(BarTabDimens.CardPadding),
         verticalArrangement = Arrangement.spacedBy(BarTabDimens.ListGap),
     ) {
+        // Scanning is an alternative to typing the tab out, so it sits with the
+        // manual entry rather than somewhere else on the screen.
+        val startScan = rememberTabScanLauncher(onAction)
+        SecondaryButton(
+            text = stringResource(R.string.scan_tab),
+            onClick = startScan,
+            modifier = Modifier.fillMaxWidth(),
+        )
         PillTextField(
             value = state.newItemName,
             onValueChange = { onAction(TabAction.NewItemNameChanged(it)) },

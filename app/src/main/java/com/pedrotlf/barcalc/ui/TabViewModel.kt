@@ -4,6 +4,7 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.pedrotlf.barcalc.data.SessionRepository
 import com.pedrotlf.barcalc.data.history.HistoryStore
+import com.pedrotlf.barcalc.data.receipt.ReceiptTextRecognizer
 import com.pedrotlf.barcalc.domain.Person
 import com.pedrotlf.barcalc.domain.SplitCalculator
 import com.pedrotlf.barcalc.domain.TabItem
@@ -26,6 +27,7 @@ import kotlinx.coroutines.launch
 class TabViewModel(
     private val repository: SessionRepository? = null,
     private val history: HistoryStore? = null,
+    private val textRecognizer: ReceiptTextRecognizer? = null,
 ) : ViewModel() {
 
     private val _uiState = MutableStateFlow(TabUiState())
@@ -99,6 +101,10 @@ class TabViewModel(
             TabAction.ShowAbout -> _uiState.update { it.copy(showAbout = true, showDrawer = false) }
             TabAction.HideAbout -> _uiState.update { it.copy(showAbout = false) }
 
+            is TabAction.ReceiptCaptured -> recognizeReceipt(action.imageUri)
+            TabAction.ScanCancelled -> _uiState.update { it.copy(scanning = false) }
+            TabAction.DismissScanResult -> _uiState.update { it.copy(scanResult = null) }
+
             TabAction.OpenDrawer -> _uiState.update { it.copy(showDrawer = true) }
             TabAction.CloseDrawer -> _uiState.update { it.copy(showDrawer = false) }
 
@@ -128,6 +134,30 @@ class TabViewModel(
             TabAction.ConfirmClearHistory -> confirmClearHistory()
             TabAction.DismissClearHistory ->
                 _uiState.update { it.copy(showClearHistoryConfirm = false) }
+        }
+    }
+
+    // ── Scanning a tab ─────────────────────────────────────────────────────
+
+    /**
+     * Reads the captured photo and keeps only the text. The image itself is
+     * never stored: it is handed to the recognizer and forgotten, so nothing
+     * of it outlives the scan.
+     */
+    private fun recognizeReceipt(imageUri: String) {
+        val recognizer = textRecognizer ?: return
+        _uiState.update { it.copy(scanning = true, scanResult = null) }
+        viewModelScope.launch {
+            val result = recognizer.recognize(imageUri)
+            _uiState.update {
+                it.copy(
+                    scanning = false,
+                    scanResult = result.fold(
+                        onSuccess = { text -> ScanResult.Text(text) },
+                        onFailure = { ScanResult.Failed },
+                    ),
+                )
+            }
         }
     }
 
@@ -335,6 +365,7 @@ class TabViewModel(
             state.showClearHistoryConfirm -> {
                 _uiState.update { it.copy(showClearHistoryConfirm = false) }; true
             }
+            state.scanResult != null -> { _uiState.update { it.copy(scanResult = null) }; true }
             state.showAbout -> { _uiState.update { it.copy(showAbout = false) }; true }
             state.showHistory -> { _uiState.update { it.copy(showHistory = false) }; true }
             state.showDrawer -> { _uiState.update { it.copy(showDrawer = false) }; true }
