@@ -19,6 +19,7 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
+import kotlinx.coroutines.withTimeoutOrNull
 import kotlinx.serialization.Serializable
 import kotlinx.serialization.json.Json
 
@@ -91,14 +92,34 @@ class GeminiTabReader(private val context: Context) : TabReader, ModelAvailabili
             }
         }
 
+        if (preparing != null) {
+            return Resolved(preparing, ModelAvailability.PREPARING, notes.joinToString("; "))
+        }
+
+        // A bare status code says nothing about *why*. Actually asking the
+        // model for something surfaces AICore's own error — BINDING_FAILURE
+        // means it needs updating and the app reinstalling, FEATURE_NOT_FOUND
+        // means it hasn't fetched its configuration yet, and each points
+        // somewhere different.
+        notes += "reason: " + probeReason(stableModel)
+
         val detail = notes.joinToString("; ")
         return when {
-            preparing != null -> Resolved(preparing, ModelAvailability.PREPARING, detail)
             // Every stage threw, so nothing is actually known about the device.
-            notes.all { "threw" in it } -> Resolved(null, ModelAvailability.UNKNOWN, detail)
+            notes.none { it.contains("unavailable") } ->
+                Resolved(null, ModelAvailability.UNKNOWN, detail)
             else -> Resolved(null, ModelAvailability.UNSUPPORTED, detail)
         }
     }
+
+    /** Asks for something trivial, purely to see how it refuses. */
+    private suspend fun probeReason(model: GenerativeModel): String =
+        withTimeoutOrNull(ProbeTimeoutMs) {
+            runCatching { model.generateContent("hi") }.fold(
+                onSuccess = { "generation worked, so the status is stale" },
+                onFailure = { "${it::class.simpleName}: ${it.message.orEmpty().take(120)}" },
+            )
+        } ?: "timed out asking"
 
     /** Outlives any one scan, because fetching the model does too. */
     private val downloadScope = CoroutineScope(SupervisorJob() + Dispatchers.IO)
@@ -186,6 +207,9 @@ class GeminiTabReader(private val context: Context) : TabReader, ModelAvailabili
 
     private companion object {
         const val MaxImageEdge = 1536
+
+        /** Long enough for a real answer, short enough not to stall a scan. */
+        const val ProbeTimeoutMs = 8_000L
 
         /** Sanity bounds — beyond these a line is a misreading, not an order. */
         const val MaxItemCents = 1_000_000L
