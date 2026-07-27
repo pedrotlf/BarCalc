@@ -37,7 +37,7 @@ import kotlinx.serialization.json.Json
  */
 class GeminiTabReader(private val context: Context) : TabReader, ModelAvailabilityProbe {
 
-    override suspend fun status(): ModelStatus = resolveModel().let {
+    override suspend fun status(): ModelStatus = resolveModel(explainFailure = true).let {
         ModelStatus(it.availability, it.detail)
     }
 
@@ -69,7 +69,7 @@ class GeminiTabReader(private val context: Context) : TabReader, ModelAvailabili
      * that genuinely lacks the model can be told apart from a call that threw
      * on the way to asking.
      */
-    private suspend fun resolveModel(): Resolved {
+    private suspend fun resolveModel(explainFailure: Boolean = false): Resolved {
         var preparing: GenerativeModel? = null
         val notes = mutableListOf<String>()
 
@@ -96,12 +96,14 @@ class GeminiTabReader(private val context: Context) : TabReader, ModelAvailabili
             return Resolved(preparing, ModelAvailability.PREPARING, notes.joinToString("; "))
         }
 
-        // A bare status code says nothing about *why*. Actually asking the
-        // model for something surfaces AICore's own error — BINDING_FAILURE
-        // means it needs updating and the app reinstalling, FEATURE_NOT_FOUND
-        // means it hasn't fetched its configuration yet, and each points
-        // somewhere different.
-        notes += "reason: " + probeReason(stableModel)
+        // A bare status code says nothing about *why*, so asking the model
+        // for something trivial surfaces AICore's own error. It is worth a
+        // round trip when reporting status, but never on the way to a scan:
+        // on a device that will never serve the model, that would stall every
+        // single scan before falling through to text recognition.
+        if (explainFailure) {
+            notes += "reason: " + cachedReason()
+        }
 
         val detail = notes.joinToString("; ")
         return when {
@@ -111,6 +113,16 @@ class GeminiTabReader(private val context: Context) : TabReader, ModelAvailabili
             else -> Resolved(null, ModelAvailability.UNSUPPORTED, detail)
         }
     }
+
+    /**
+     * The refusal only needs establishing once — it won't change while the app
+     * is running, and re-asking would pay the timeout again each time.
+     */
+    private suspend fun cachedReason(): String =
+        cachedFailureReason ?: probeReason(stableModel).also { cachedFailureReason = it }
+
+    @Volatile
+    private var cachedFailureReason: String? = null
 
     /** Asks for something trivial, purely to see how it refuses. */
     private suspend fun probeReason(model: GenerativeModel): String =
