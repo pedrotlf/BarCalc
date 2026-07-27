@@ -102,6 +102,7 @@ dependencies {
     ksp(libs.androidx.room.compiler)
     implementation(libs.mlkit.text.recognition)
     implementation(libs.mlkit.document.scanner)
+    implementation(libs.mlkit.genai.prompt)
     debugImplementation(libs.androidx.ui.tooling)
 
     testImplementation(libs.junit)

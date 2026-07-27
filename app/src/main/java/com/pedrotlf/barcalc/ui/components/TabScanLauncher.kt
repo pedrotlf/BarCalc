@@ -24,7 +24,7 @@ private val ScannerOptions = GmsDocumentScannerOptions.Builder()
     .setPageLimit(1)
     .setGalleryImportAllowed(false)
     .setResultFormats(GmsDocumentScannerOptions.RESULT_FORMAT_JPEG)
-    .setScannerMode(GmsDocumentScannerOptions.SCANNER_MODE_FULL)
+    .setScannerMode(GmsDocumentScannerOptions.SCANNER_MODE_BASE_WITH_FILTER)
     .build()
 
 /**

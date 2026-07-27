@@ -66,7 +66,8 @@
     <string name="scan_failed">That photo couldn\'t be read. Try again with the tab flat and well lit.</string>
     <string name="scan_empty">No text found in that photo. Try again with the tab flat and well lit.</string>
     <string name="scan_no_items">No items recognised. The text below is what was read &#8212; you can still add the items by hand.</string>
-    <string name="scan_raw_text_heading">What was read</string>
+    <string name="scan_source_model">Read by the on-device model</string>
+    <string name="scan_source_text">Read by text recognition</string>
 
     <!-- Drawer -->
     <string name="cd_menu">Menu</string>

@@ -29,6 +29,7 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.pedrotlf.barcalc.R
+import com.pedrotlf.barcalc.data.receipt.ReadingSource
 import com.pedrotlf.barcalc.domain.SplitCalculator
 import com.pedrotlf.barcalc.domain.receipt.ReceiptParser
 import com.pedrotlf.barcalc.ui.ScanDraft
@@ -135,7 +136,7 @@ fun ScanReviewScreen(scanning: Boolean, result: ScanResult?, onAction: (TabActio
                     }
                     // What the parser worked from, so a line it missed can be
                     // spotted and typed in rather than silently lost.
-                    RawTextSection(read.rawText)
+                    RawTextSection(read.rawText, read.source)
                 }
                 else -> Unit
             }
@@ -235,7 +236,7 @@ private fun DraftRow(draft: ScanDraft, onAction: (TabAction) -> Unit) {
 
 /** The raw recognised text, kept for comparison against the parsed result. */
 @Composable
-private fun RawTextSection(text: String) {
+private fun RawTextSection(text: String, source: ReadingSource) {
     Column(
         Modifier.padding(
             start = BarTabDimens.ScreenHPadding,
@@ -245,7 +246,15 @@ private fun RawTextSection(text: String) {
         ),
         verticalArrangement = Arrangement.spacedBy(6.dp),
     ) {
-        Text(stringResource(R.string.scan_raw_text_heading), style = BarTabType.Hint)
+        Text(
+            stringResource(
+                when (source) {
+                    ReadingSource.MODEL -> R.string.scan_source_model
+                    ReadingSource.TEXT -> R.string.scan_source_text
+                },
+            ),
+            style = BarTabType.Hint,
+        )
         Text(
             text,
             style = BarTabType.Body.copy(

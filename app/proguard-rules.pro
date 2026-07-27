@@ -26,7 +26,12 @@
 -keep class com.google.mlkit.vision.text.** { *; }
 -keep class com.google.mlkit.vision.documentscanner.** { *; }
 -keep class com.google.android.gms.internal.mlkit_vision_text** { *; }
+-keep class com.google.mlkit.genai.** { *; }
 -dontwarn com.google.mlkit.**
+
+# The model's reply is deserialised into these, so their names and fields have
+# to survive minification even though nothing in the app calls them directly.
+-keep class com.pedrotlf.barcalc.data.receipt.GeminiTabReader$* { *; }
 
 # ── kotlinx.serialization ─────────────────────────────────────────────────────
 # The runtime ships consumer rules, but we keep our own @Serializable models and

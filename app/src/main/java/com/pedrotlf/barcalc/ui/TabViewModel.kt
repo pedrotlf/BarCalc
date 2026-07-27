@@ -4,10 +4,9 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.pedrotlf.barcalc.data.SessionRepository
 import com.pedrotlf.barcalc.data.history.HistoryStore
-import com.pedrotlf.barcalc.data.receipt.ReceiptTextRecognizer
+import com.pedrotlf.barcalc.data.receipt.TabReader
 import com.pedrotlf.barcalc.domain.Person
 import com.pedrotlf.barcalc.domain.SplitCalculator
-import com.pedrotlf.barcalc.domain.receipt.ReceiptParser
 import com.pedrotlf.barcalc.domain.TabItem
 import kotlinx.coroutines.FlowPreview
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -28,7 +27,7 @@ import kotlinx.coroutines.launch
 class TabViewModel(
     private val repository: SessionRepository? = null,
     private val history: HistoryStore? = null,
-    private val textRecognizer: ReceiptTextRecognizer? = null,
+    private val tabReader: TabReader? = null,
 ) : ViewModel() {
 
     private val _uiState = MutableStateFlow(TabUiState())
@@ -192,18 +191,18 @@ class TabViewModel(
     }
 
     private fun recognizeReceipt(imageUri: String) {
-        val recognizer = textRecognizer ?: return
+        val reader = tabReader ?: return
         _uiState.update { it.copy(scanning = true, scanResult = null) }
         viewModelScope.launch {
-            val result = recognizer.recognize(imageUri)
+            val result = reader.read(imageUri)
             _uiState.update {
                 it.copy(
                     scanning = false,
                     scanResult = result.fold(
-                        onSuccess = { text ->
-                            val drafts = ReceiptParser.parse(text)
+                        onSuccess = { reading ->
+                            val drafts = reading.items
                                 .mapIndexed { index, item -> ScanDraft.from(index, item) }
-                            ScanResult.Read(drafts, text)
+                            ScanResult.Read(drafts, reading.rawText, reading.source)
                         },
                         onFailure = { ScanResult.Failed },
                     ),

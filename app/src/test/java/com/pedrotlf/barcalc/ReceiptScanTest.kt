@@ -1,6 +1,9 @@
 package com.pedrotlf.barcalc
 
-import com.pedrotlf.barcalc.data.receipt.ReceiptTextRecognizer
+import com.pedrotlf.barcalc.data.receipt.ReadingSource
+import com.pedrotlf.barcalc.data.receipt.TabReader
+import com.pedrotlf.barcalc.data.receipt.TabReading
+import com.pedrotlf.barcalc.domain.receipt.ReceiptParser
 import com.pedrotlf.barcalc.ui.ScanResult
 import com.pedrotlf.barcalc.ui.TabAction
 import com.pedrotlf.barcalc.ui.TabViewModel
@@ -17,12 +20,12 @@ import org.junit.Assert.assertTrue
 import org.junit.Before
 import org.junit.Test
 
-/** Recognizer that answers with whatever the test asks for, no ML Kit involved. */
-private class FakeRecognizer(private val answer: Result<String>) : ReceiptTextRecognizer {
+/** Reader that answers with whatever the test asks for, no ML Kit involved. */
+private class FakeRecognizer(private val answer: Result<String>) : TabReader {
     val seen = mutableListOf<String>()
-    override suspend fun recognize(imageUri: String): Result<String> {
+    override suspend fun read(imageUri: String): Result<TabReading> {
         seen += imageUri
-        return answer
+        return answer.map { TabReading(ReceiptParser.parse(it), it, ReadingSource.TEXT) }
     }
 }
 
@@ -38,7 +41,7 @@ class ReceiptScanTest {
     @Test
     fun `a captured photo is read and its text surfaced`() {
         val recognizer = FakeRecognizer(Result.success("2x Chopp  24,00"))
-        val vm = TabViewModel(textRecognizer = recognizer)
+        val vm = TabViewModel(tabReader = recognizer)
 
         vm.onAction(TabAction.ReceiptCaptured("content://scan/1.jpg"))
 
@@ -55,7 +58,7 @@ class ReceiptScanTest {
 
     @Test
     fun `a photo that can't be read reports a failure rather than empty text`() {
-        val vm = TabViewModel(textRecognizer = FakeRecognizer(Result.failure(RuntimeException())))
+        val vm = TabViewModel(tabReader = FakeRecognizer(Result.failure(RuntimeException())))
 
         vm.onAction(TabAction.ReceiptCaptured("content://scan/broken.jpg"))
 
@@ -67,7 +70,7 @@ class ReceiptScanTest {
     fun `a photo with no text is a success carrying nothing`() {
         // Distinct from a failure: the read worked, the tab just had nothing on
         // it, and the screen says so differently.
-        val vm = TabViewModel(textRecognizer = FakeRecognizer(Result.success("")))
+        val vm = TabViewModel(tabReader = FakeRecognizer(Result.success("")))
 
         vm.onAction(TabAction.ReceiptCaptured("content://scan/blank.jpg"))
 
@@ -78,7 +81,7 @@ class ReceiptScanTest {
 
     @Test
     fun `backing out of the scanner leaves no result behind`() {
-        val vm = TabViewModel(textRecognizer = FakeRecognizer(Result.success("x")))
+        val vm = TabViewModel(tabReader = FakeRecognizer(Result.success("x")))
 
         vm.onAction(TabAction.ScanCancelled)
 
@@ -89,7 +92,7 @@ class ReceiptScanTest {
     @Test
     fun `dismissing, and back, close the result`() {
         val recognizer = FakeRecognizer(Result.success("Chopp 12,00"))
-        val vm = TabViewModel(textRecognizer = recognizer)
+        val vm = TabViewModel(tabReader = recognizer)
 
         vm.onAction(TabAction.ReceiptCaptured("content://scan/1.jpg"))
         vm.onAction(TabAction.DismissScanResult)
@@ -103,7 +106,7 @@ class ReceiptScanTest {
     // ── Checking over a scan ───────────────────────────────────────────────
 
     private fun scannedVm(text: String): TabViewModel {
-        val vm = TabViewModel(textRecognizer = FakeRecognizer(Result.success(text)))
+        val vm = TabViewModel(tabReader = FakeRecognizer(Result.success(text)))
         vm.onAction(TabAction.ReceiptCaptured("content://scan/1.jpg"))
         return vm
     }
@@ -152,7 +155,7 @@ class ReceiptScanTest {
 
     @Test
     fun `scanned items are added to a tab already in progress, not replacing it`() {
-        val vm = TabViewModel(textRecognizer = FakeRecognizer(Result.success("Nachos 12,00")))
+        val vm = TabViewModel(tabReader = FakeRecognizer(Result.success("Nachos 12,00")))
         vm.onNewItemNameChange("Beer")
         vm.onNewItemPriceChange(1000L)
         vm.addItem()
@@ -208,7 +211,7 @@ class ReceiptScanTest {
     @Test
     fun `scanning alone never touches the tab`() {
         // Phase one only reads text; nothing is added until the parser exists.
-        val vm = TabViewModel(textRecognizer = FakeRecognizer(Result.success("2x Chopp 24,00")))
+        val vm = TabViewModel(tabReader = FakeRecognizer(Result.success("2x Chopp 24,00")))
         vm.onNewItemNameChange("Beer")
         vm.onNewItemPriceChange(1000L)
         vm.addItem()

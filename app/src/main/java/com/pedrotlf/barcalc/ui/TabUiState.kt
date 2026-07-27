@@ -1,5 +1,6 @@
 package com.pedrotlf.barcalc.ui
 
+import com.pedrotlf.barcalc.data.receipt.ReadingSource
 import com.pedrotlf.barcalc.domain.HistoryEntry
 import com.pedrotlf.barcalc.domain.Person
 import com.pedrotlf.barcalc.domain.receipt.ParsedItem
@@ -84,7 +85,11 @@ sealed interface ScanResult {
      * kept alongside so a disappointing parse can be compared against what was
      * actually on the page. Either may be empty.
      */
-    data class Read(val drafts: List<ScanDraft>, val rawText: String) : ScanResult {
+    data class Read(
+        val drafts: List<ScanDraft>,
+        val rawText: String,
+        val source: ReadingSource = ReadingSource.TEXT,
+    ) : ScanResult {
 
         /** Only the lines the user has kept, ready to become items. */
         val included: List<ScanDraft> get() = drafts.filter { it.included && it.isUsable }

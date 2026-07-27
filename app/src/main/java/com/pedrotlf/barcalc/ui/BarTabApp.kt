@@ -30,7 +30,10 @@ import com.pedrotlf.barcalc.R
 import com.pedrotlf.barcalc.data.SessionRepository
 import com.pedrotlf.barcalc.data.history.BarCalcDatabase
 import com.pedrotlf.barcalc.data.history.RoomHistoryStore
+import com.pedrotlf.barcalc.data.receipt.ChainedTabReader
+import com.pedrotlf.barcalc.data.receipt.GeminiTabReader
 import com.pedrotlf.barcalc.data.receipt.MlKitReceiptTextRecognizer
+import com.pedrotlf.barcalc.data.receipt.TextTabReader
 import com.pedrotlf.barcalc.ui.components.LocalCurrencySymbol
 import com.pedrotlf.barcalc.ui.screens.AboutSheet
 import com.pedrotlf.barcalc.ui.screens.AppDrawer
@@ -54,7 +57,14 @@ fun BarTabApp(vm: TabViewModel? = null) {
         TabViewModel(
             repository = SessionRepository(appContext),
             history = RoomHistoryStore(BarCalcDatabase.get(appContext).tabHistoryDao()),
-            textRecognizer = MlKitReceiptTextRecognizer(appContext),
+            // Nano first where the device carries it, text recognition
+            // everywhere else — and whenever the model finds nothing.
+            tabReader = ChainedTabReader(
+                listOf(
+                    GeminiTabReader(appContext),
+                    TextTabReader(MlKitReceiptTextRecognizer(appContext)),
+                ),
+            ),
         )
     }
     val state by vm.uiState.collectAsState()

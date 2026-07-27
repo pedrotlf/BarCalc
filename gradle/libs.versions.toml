@@ -17,6 +17,8 @@ room = "2.8.4"
 # never needs the network. The scanner UI comes from Play Services.
 mlkitTextRecognition = "16.0.1"
 mlkitDocumentScanner = "16.0.0"
+# On-device Gemini Nano. Still a beta artifact — see the phase four PR.
+mlkitGenAiPrompt = "1.0.0-beta4"
 # Must track the Kotlin version above (KSP releases are per-Kotlin-version).
 ksp = "2.2.10-2.0.2"
 
@@ -43,6 +45,7 @@ androidx-room-ktx = { group = "androidx.room", name = "room-ktx", version.ref = 
 androidx-room-compiler = { group = "androidx.room", name = "room-compiler", version.ref = "room" }
 mlkit-text-recognition = { group = "com.google.mlkit", name = "text-recognition", version.ref = "mlkitTextRecognition" }
 mlkit-document-scanner = { group = "com.google.android.gms", name = "play-services-mlkit-document-scanner", version.ref = "mlkitDocumentScanner" }
+mlkit-genai-prompt = { group = "com.google.mlkit", name = "genai-prompt", version.ref = "mlkitGenAiPrompt" }
 
 [plugins]
 android-application = { id = "com.android.application", version.ref = "agp" }
