@@ -30,7 +30,16 @@ import kotlinx.serialization.json.Json
  * Only available on the devices that carry Nano; elsewhere this reports a
  * failure and the chain falls through to text recognition.
  */
-class GeminiTabReader(private val context: Context) : TabReader {
+class GeminiTabReader(private val context: Context) : TabReader, ModelAvailabilityProbe {
+
+    override suspend fun availability(): ModelAvailability =
+        runCatching {
+            when (model.checkStatus()) {
+                FeatureStatus.AVAILABLE -> ModelAvailability.AVAILABLE
+                FeatureStatus.DOWNLOADABLE, FeatureStatus.DOWNLOADING -> ModelAvailability.PREPARING
+                else -> ModelAvailability.UNSUPPORTED
+            }
+        }.getOrDefault(ModelAvailability.UNKNOWN)
 
     private val model by lazy { Generation.getClient() }
     private val json = Json { ignoreUnknownKeys = true; isLenient = true }

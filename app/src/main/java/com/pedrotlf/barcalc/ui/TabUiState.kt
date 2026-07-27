@@ -1,5 +1,6 @@
 package com.pedrotlf.barcalc.ui
 
+import com.pedrotlf.barcalc.data.receipt.ModelAvailability
 import com.pedrotlf.barcalc.data.receipt.ReadingSource
 import com.pedrotlf.barcalc.domain.HistoryEntry
 import com.pedrotlf.barcalc.domain.Person
@@ -49,6 +50,8 @@ data class TabUiState(
     val showClearHistoryConfirm: Boolean = false,
     /** True while a captured photo is being read. */
     val scanning: Boolean = false,
+    /** Where the on-device model stands, as of the last scan. */
+    val modelAvailability: ModelAvailability = ModelAvailability.UNKNOWN,
     /** Text recognised from the last scan, or null when nothing is showing. */
     val scanResult: ScanResult? = null,
 ) {

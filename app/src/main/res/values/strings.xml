@@ -66,6 +66,10 @@
     <string name="scan_failed">That photo couldn\'t be read. Try again with the tab flat and well lit.</string>
     <string name="scan_empty">No text found in that photo. Try again with the tab flat and well lit.</string>
     <string name="scan_no_items">No items recognised. The text below is what was read &#8212; you can still add the items by hand.</string>
+    <string name="scan_model_available">On-device model: ready</string>
+    <string name="scan_model_preparing">On-device model: downloading — text recognition used until it&#8217;s ready</string>
+    <string name="scan_model_unsupported">On-device model: not supported on this phone — using text recognition</string>
+    <string name="scan_model_unknown">On-device model: status unknown</string>
     <string name="scan_source_model">Read by the on-device model</string>
     <string name="scan_source_text">Read by text recognition</string>
 

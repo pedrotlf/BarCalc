@@ -66,6 +66,10 @@
     <string name="scan_failed">Não deu para ler essa foto. Tente de novo com a comanda esticada e bem iluminada.</string>
     <string name="scan_empty">Nenhum texto encontrado nessa foto. Tente de novo com a comanda esticada e bem iluminada.</string>
     <string name="scan_no_items">Nenhum item reconhecido. O texto abaixo é o que foi lido &#8212; você ainda pode adicionar os itens à mão.</string>
+    <string name="scan_model_available">Modelo no aparelho: pronto</string>
+    <string name="scan_model_preparing">Modelo no aparelho: baixando — até lá, usando reconhecimento de texto</string>
+    <string name="scan_model_unsupported">Modelo no aparelho: sem suporte neste celular — usando reconhecimento de texto</string>
+    <string name="scan_model_unknown">Modelo no aparelho: estado desconhecido</string>
     <string name="scan_source_model">Lido pelo modelo no aparelho</string>
     <string name="scan_source_text">Lido por reconhecimento de texto</string>
 

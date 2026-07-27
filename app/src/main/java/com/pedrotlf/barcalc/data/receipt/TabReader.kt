@@ -7,6 +7,18 @@ import com.pedrotlf.barcalc.domain.receipt.ReceiptParser
 enum class ReadingSource { MODEL, TEXT }
 
 /**
+ * Where the on-device model stands, independent of which reader happened to
+ * win. Without this, "read by text recognition" is ambiguous: the model might
+ * be missing from the device, still downloading, or simply have found nothing.
+ */
+enum class ModelAvailability { AVAILABLE, PREPARING, UNSUPPORTED, UNKNOWN }
+
+/** Reports whether the on-device model can be used on this device. */
+interface ModelAvailabilityProbe {
+    suspend fun availability(): ModelAvailability
+}
+
+/**
  * What a reader made of a photographed tab. [rawText] is whatever the reader
  * worked from or produced, kept so a thin result can be held up against it.
  */

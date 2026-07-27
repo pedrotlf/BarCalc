@@ -29,6 +29,7 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.pedrotlf.barcalc.R
+import com.pedrotlf.barcalc.data.receipt.ModelAvailability
 import com.pedrotlf.barcalc.data.receipt.ReadingSource
 import com.pedrotlf.barcalc.domain.SplitCalculator
 import com.pedrotlf.barcalc.domain.receipt.ReceiptParser
@@ -59,7 +60,12 @@ import com.pedrotlf.barcalc.ui.theme.BarTabType
  * came back wrong.
  */
 @Composable
-fun ScanReviewScreen(scanning: Boolean, result: ScanResult?, onAction: (TabAction) -> Unit) {
+fun ScanReviewScreen(
+    scanning: Boolean,
+    result: ScanResult?,
+    modelAvailability: ModelAvailability,
+    onAction: (TabAction) -> Unit,
+) {
     val currency = LocalCurrencySymbol.current
     val read = result as? ScanResult.Read
 
@@ -103,6 +109,8 @@ fun ScanReviewScreen(scanning: Boolean, result: ScanResult?, onAction: (TabActio
                 leading = { HeaderCloseButton { onAction(TabAction.DismissScanResult) } },
             )
 
+            if (!scanning) ModelStatusLine(modelAvailability)
+
             when {
                 scanning -> ScanningIndicator()
                 result is ScanResult.Failed -> EmptyListHint(stringResource(R.string.scan_failed))
@@ -142,6 +150,31 @@ fun ScanReviewScreen(scanning: Boolean, result: ScanResult?, onAction: (TabActio
             }
         }
     }
+}
+
+/**
+ * Where the on-device model stands, shown whatever the outcome — otherwise
+ * "read by text recognition" can't be told apart from the model being absent,
+ * still downloading, or having found nothing.
+ */
+@Composable
+private fun ModelStatusLine(availability: ModelAvailability) {
+    Text(
+        stringResource(
+            when (availability) {
+                ModelAvailability.AVAILABLE -> R.string.scan_model_available
+                ModelAvailability.PREPARING -> R.string.scan_model_preparing
+                ModelAvailability.UNSUPPORTED -> R.string.scan_model_unsupported
+                ModelAvailability.UNKNOWN -> R.string.scan_model_unknown
+            },
+        ),
+        style = BarTabType.Caption,
+        modifier = Modifier.padding(
+            start = BarTabDimens.ScreenHPadding,
+            end = BarTabDimens.ScreenHPadding,
+            top = 6.dp,
+        ),
+    )
 }
 
 @Composable
@@ -288,6 +321,7 @@ private fun ScanReviewScreenPreview() {
         ScanReviewScreen(
             scanning = false,
             result = ScanResult.Read(drafts, PreviewRawText),
+            modelAvailability = ModelAvailability.AVAILABLE,
             onAction = {},
         )
     }
@@ -303,6 +337,7 @@ private fun ScanReviewScreenPartialPreview() {
         ScanReviewScreen(
             scanning = false,
             result = ScanResult.Read(drafts, PreviewRawText),
+            modelAvailability = ModelAvailability.AVAILABLE,
             onAction = {},
         )
     }
@@ -312,6 +347,11 @@ private fun ScanReviewScreenPartialPreview() {
 @Composable
 private fun ScanReviewScreenLoadingPreview() {
     BarCalcTheme {
-        ScanReviewScreen(scanning = true, result = null, onAction = {})
+        ScanReviewScreen(
+            scanning = true,
+            result = null,
+            modelAvailability = ModelAvailability.AVAILABLE,
+            onAction = {},
+        )
     }
 }

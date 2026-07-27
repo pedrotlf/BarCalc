@@ -54,17 +54,16 @@ fun BarTabApp(vm: TabViewModel? = null) {
     val appContext = LocalContext.current.applicationContext
     @Suppress("NAME_SHADOWING")
     val vm = vm ?: viewModel {
+        val gemini = GeminiTabReader(appContext)
         TabViewModel(
             repository = SessionRepository(appContext),
             history = RoomHistoryStore(BarCalcDatabase.get(appContext).tabHistoryDao()),
             // Nano first where the device carries it, text recognition
             // everywhere else — and whenever the model finds nothing.
             tabReader = ChainedTabReader(
-                listOf(
-                    GeminiTabReader(appContext),
-                    TextTabReader(MlKitReceiptTextRecognizer(appContext)),
-                ),
+                listOf(gemini, TextTabReader(MlKitReceiptTextRecognizer(appContext))),
             ),
+            modelProbe = gemini,
         )
     }
     val state by vm.uiState.collectAsState()
@@ -156,7 +155,7 @@ fun BarTabApp(vm: TabViewModel? = null) {
                 enter = fadeIn(tween(160)),
                 exit = fadeOut(tween(120)),
             ) {
-                ScanReviewScreen(state.scanning, state.scanResult, onAction)
+                ScanReviewScreen(state.scanning, state.scanResult, state.modelAvailability, onAction)
             }
 
             // History lives above the wizard but below the drawer and dialogs.

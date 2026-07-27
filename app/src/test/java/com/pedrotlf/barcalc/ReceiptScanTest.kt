@@ -1,5 +1,7 @@
 package com.pedrotlf.barcalc
 
+import com.pedrotlf.barcalc.data.receipt.ModelAvailability
+import com.pedrotlf.barcalc.data.receipt.ModelAvailabilityProbe
 import com.pedrotlf.barcalc.data.receipt.ReadingSource
 import com.pedrotlf.barcalc.data.receipt.TabReader
 import com.pedrotlf.barcalc.data.receipt.TabReading
@@ -37,6 +39,24 @@ class ReceiptScanTest {
 
     @After
     fun tearDownDispatcher() = Dispatchers.resetMain()
+
+    @Test
+    fun `the model's availability is refreshed with each scan`() {
+        // Which reader won doesn't say whether the model was missing, still
+        // downloading, or just found nothing — this is what distinguishes them.
+        val probe = object : ModelAvailabilityProbe {
+            override suspend fun availability() = ModelAvailability.UNSUPPORTED
+        }
+        val vm = TabViewModel(
+            tabReader = FakeRecognizer(Result.success("Nachos 12,00")),
+            modelProbe = probe,
+        )
+        assertEquals(ModelAvailability.UNKNOWN, vm.uiState.value.modelAvailability)
+
+        vm.onAction(TabAction.ReceiptCaptured("content://scan/1.jpg"))
+
+        assertEquals(ModelAvailability.UNSUPPORTED, vm.uiState.value.modelAvailability)
+    }
 
     @Test
     fun `a captured photo is read and its text surfaced`() {

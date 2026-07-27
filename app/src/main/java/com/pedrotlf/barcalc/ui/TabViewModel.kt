@@ -4,6 +4,7 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.pedrotlf.barcalc.data.SessionRepository
 import com.pedrotlf.barcalc.data.history.HistoryStore
+import com.pedrotlf.barcalc.data.receipt.ModelAvailabilityProbe
 import com.pedrotlf.barcalc.data.receipt.TabReader
 import com.pedrotlf.barcalc.domain.Person
 import com.pedrotlf.barcalc.domain.SplitCalculator
@@ -28,6 +29,7 @@ class TabViewModel(
     private val repository: SessionRepository? = null,
     private val history: HistoryStore? = null,
     private val tabReader: TabReader? = null,
+    private val modelProbe: ModelAvailabilityProbe? = null,
 ) : ViewModel() {
 
     private val _uiState = MutableStateFlow(TabUiState())
@@ -195,9 +197,13 @@ class TabViewModel(
         _uiState.update { it.copy(scanning = true, scanResult = null) }
         viewModelScope.launch {
             val result = reader.read(imageUri)
+            // Asked after the read, so a model that finished downloading
+            // mid-scan is reported as ready rather than as still preparing.
+            val availability = modelProbe?.availability()
             _uiState.update {
                 it.copy(
                     scanning = false,
+                    modelAvailability = availability ?: it.modelAvailability,
                     scanResult = result.fold(
                         onSuccess = { reading ->
                             val drafts = reading.items
