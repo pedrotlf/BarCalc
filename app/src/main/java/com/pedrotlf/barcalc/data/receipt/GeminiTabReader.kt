@@ -6,6 +6,10 @@ import android.graphics.ImageDecoder
 import androidx.core.net.toUri
 import com.google.mlkit.genai.common.FeatureStatus
 import com.google.mlkit.genai.prompt.Generation
+import com.google.mlkit.genai.prompt.GenerativeModel
+import com.google.mlkit.genai.prompt.ModelReleaseStage
+import com.google.mlkit.genai.prompt.generationConfig
+import com.google.mlkit.genai.prompt.modelConfig
 import com.google.mlkit.genai.prompt.ImagePart
 import com.google.mlkit.genai.prompt.TextPart
 import com.google.mlkit.genai.prompt.generateContentRequest
@@ -32,17 +36,44 @@ import kotlinx.serialization.json.Json
  */
 class GeminiTabReader(private val context: Context) : TabReader, ModelAvailabilityProbe {
 
-    override suspend fun availability(): ModelAvailability =
-        runCatching {
-            when (model.checkStatus()) {
-                FeatureStatus.AVAILABLE -> ModelAvailability.AVAILABLE
-                FeatureStatus.DOWNLOADABLE, FeatureStatus.DOWNLOADING -> ModelAvailability.PREPARING
-                else -> ModelAvailability.UNSUPPORTED
-            }
-        }.getOrDefault(ModelAvailability.UNKNOWN)
+    override suspend fun availability(): ModelAvailability = resolveModel().availability
 
-    private val model by lazy { Generation.getClient() }
+    /**
+     * Feeding the model a picture is a preview capability, so the preview
+     * model is asked for first — the stable one reports itself unavailable on
+     * devices that do carry Nano, which reads as "unsupported phone" when it
+     * really means "wrong model asked for". Stable is still tried as a
+     * fallback, in case a device offers only that.
+     */
+    private val previewModel by lazy { client(ModelReleaseStage.PREVIEW) }
+    private val stableModel by lazy { client(ModelReleaseStage.STABLE) }
+
     private val json = Json { ignoreUnknownKeys = true; isLenient = true }
+
+    private fun client(stage: Int) = Generation.getClient(
+        generationConfig { modelConfig = modelConfig { releaseStage = stage } },
+    )
+
+    private class Resolved(val model: GenerativeModel?, val availability: ModelAvailability)
+
+    /** The first model this device will actually give us, preview preferred. */
+    private suspend fun resolveModel(): Resolved {
+        var preparing: GenerativeModel? = null
+        listOf(previewModel, stableModel).forEach { candidate ->
+            when (runCatching { candidate.checkStatus() }.getOrNull()) {
+                FeatureStatus.AVAILABLE ->
+                    return Resolved(candidate, ModelAvailability.AVAILABLE)
+                FeatureStatus.DOWNLOADABLE, FeatureStatus.DOWNLOADING ->
+                    if (preparing == null) preparing = candidate
+                else -> Unit
+            }
+        }
+        return if (preparing != null) {
+            Resolved(preparing, ModelAvailability.PREPARING)
+        } else {
+            Resolved(null, ModelAvailability.UNSUPPORTED)
+        }
+    }
 
     /** Outlives any one scan, because fetching the model does too. */
     private val downloadScope = CoroutineScope(SupervisorJob() + Dispatchers.IO)
@@ -51,19 +82,14 @@ class GeminiTabReader(private val context: Context) : TabReader, ModelAvailabili
     private var downloadRequested = false
 
     override suspend fun read(imageUri: String): Result<TabReading> = runCatching {
-        when (model.checkStatus()) {
-            FeatureStatus.AVAILABLE -> Unit
-
-            FeatureStatus.DOWNLOADABLE, FeatureStatus.DOWNLOADING -> {
-                // Fetching the model takes far too long to hold up a scan, so
-                // it's started once in the background and this scan falls
-                // through to text recognition. The next one gets the better
-                // reading.
-                startDownloadOnce()
-                error("Gemini Nano is still being prepared")
-            }
-
-            else -> error("Gemini Nano isn't available on this device")
+        val resolved = resolveModel()
+        val model = resolved.model ?: error("Gemini Nano isn't available on this device")
+        if (resolved.availability != ModelAvailability.AVAILABLE) {
+            // Fetching the model takes far too long to hold up a scan, so it's
+            // started once in the background and this scan falls through to
+            // text recognition. The next one gets the better reading.
+            startDownloadOnce(model)
+            error("Gemini Nano is still being prepared")
         }
 
         val bitmap = withContext(Dispatchers.IO) { loadBitmap(imageUri) }
@@ -74,7 +100,7 @@ class GeminiTabReader(private val context: Context) : TabReader, ModelAvailabili
         TabReading(parseItems(text), text, ReadingSource.MODEL)
     }
 
-    private fun startDownloadOnce() {
+    private fun startDownloadOnce(model: GenerativeModel) {
         if (downloadRequested) return
         downloadRequested = true
         downloadScope.launch {
