@@ -30,6 +30,7 @@ import com.pedrotlf.barcalc.R
 import com.pedrotlf.barcalc.data.SessionRepository
 import com.pedrotlf.barcalc.data.history.BarCalcDatabase
 import com.pedrotlf.barcalc.data.history.RoomHistoryStore
+import com.pedrotlf.barcalc.data.receipt.MlKitReceiptTextRecognizer
 import com.pedrotlf.barcalc.ui.components.LocalCurrencySymbol
 import com.pedrotlf.barcalc.ui.screens.AboutSheet
 import com.pedrotlf.barcalc.ui.screens.AppDrawer
@@ -41,6 +42,7 @@ import com.pedrotlf.barcalc.ui.screens.PeopleScreen
 import com.pedrotlf.barcalc.ui.screens.RenameEntryDialog
 import com.pedrotlf.barcalc.ui.screens.ResetConfirmDialog
 import com.pedrotlf.barcalc.ui.screens.ResultsScreen
+import com.pedrotlf.barcalc.ui.screens.ScanResultScreen
 import com.pedrotlf.barcalc.ui.theme.BarTabColors
 
 /** Root of the wizard: screen switching, claim sheet overlay, back handling. */
@@ -52,6 +54,7 @@ fun BarTabApp(vm: TabViewModel? = null) {
         TabViewModel(
             repository = SessionRepository(appContext),
             history = RoomHistoryStore(BarCalcDatabase.get(appContext).tabHistoryDao()),
+            textRecognizer = MlKitReceiptTextRecognizer(appContext),
         )
     }
     val state by vm.uiState.collectAsState()
@@ -81,7 +84,8 @@ fun BarTabApp(vm: TabViewModel? = null) {
             state.pendingDuplicateId != null ||
             state.renamingEntryId != null ||
             state.pendingDeleteEntryId != null ||
-            state.showClearHistoryConfirm,
+            state.showClearHistoryConfirm ||
+            state.scanResult != null,
     ) {
         onAction(TabAction.Back)
     }
@@ -135,6 +139,14 @@ fun BarTabApp(vm: TabViewModel? = null) {
                 exit = fadeOut(tween(120)),
             ) {
                 ResetConfirmDialog(onAction)
+            }
+
+            AnimatedVisibility(
+                visible = state.scanning || state.scanResult != null,
+                enter = fadeIn(tween(160)),
+                exit = fadeOut(tween(120)),
+            ) {
+                ScanResultScreen(state.scanning, state.scanResult, onAction)
             }
 
             // History lives above the wizard but below the drawer and dialogs.

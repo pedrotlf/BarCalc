@@ -52,6 +52,19 @@ sealed interface TabAction {
     data object ShowAbout : TabAction
     data object HideAbout : TabAction
 
+    // ── Scanning a tab ─────────────────────────────────────────────────────
+    /**
+     * A photo of the tab came back from the scanner. [imageUri] is read once
+     * and not kept — the picture never becomes part of the session.
+     */
+    data class ReceiptCaptured(val imageUri: String) : TabAction
+
+    /** The scanner was dismissed or couldn't start. */
+    data object ScanCancelled : TabAction
+
+    /** Close the recognised-text view. */
+    data object DismissScanResult : TabAction
+
     // ── Drawer ─────────────────────────────────────────────────────────────
     data object OpenDrawer : TabAction
     data object CloseDrawer : TabAction

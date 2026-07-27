@@ -52,6 +52,14 @@
     <string name="cd_close">Close</string>
     <string name="cd_back">Back</string>
 
+    <!-- Scanning a tab -->
+    <string name="scan_tab">Scan the tab</string>
+    <string name="scan_result_title">Scanned tab</string>
+    <string name="scan_result_subtitle">Here\'s what the camera read. Turning it into items is coming soon.</string>
+    <string name="scan_reading">Reading the tab…</string>
+    <string name="scan_failed">That photo couldn\'t be read. Try again with the tab flat and well lit.</string>
+    <string name="scan_empty">No text found in that photo. Try again with the tab flat and well lit.</string>
+
     <!-- Drawer -->
     <string name="cd_menu">Menu</string>
     <string name="menu_title">Menu</string>
