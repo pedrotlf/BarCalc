@@ -2,6 +2,7 @@ package com.pedrotlf.barcalc.ui
 
 import com.pedrotlf.barcalc.domain.HistoryEntry
 import com.pedrotlf.barcalc.domain.Person
+import com.pedrotlf.barcalc.domain.receipt.ParsedItem
 import com.pedrotlf.barcalc.domain.TabItem
 import kotlinx.serialization.Serializable
 
@@ -77,8 +78,12 @@ data class TabUiState(
  */
 sealed interface ScanResult {
 
-    /** Text was read; [text] is blank when the photo held none we could use. */
-    data class Text(val text: String) : ScanResult
+    /**
+     * The photo was read. [items] is what the parser made of it and [rawText]
+     * is what it worked from — kept alongside so a disappointing parse can be
+     * compared against what was actually on the page. Either may be empty.
+     */
+    data class Read(val items: List<ParsedItem>, val rawText: String) : ScanResult
 
     /** Reading failed outright, e.g. the image couldn't be opened. */
     data object Failed : ScanResult
