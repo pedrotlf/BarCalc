@@ -41,14 +41,13 @@ class GeminiTabReader(private val context: Context) : TabReader, ModelAvailabili
     }
 
     /**
-     * Feeding the model a picture is a preview capability, so the preview
-     * model is asked for first — the stable one reports itself unavailable on
-     * devices that do carry Nano, which reads as "unsupported phone" when it
-     * really means "wrong model asked for". Stable is still tried as a
-     * fallback, in case a device offers only that.
+     * Stable is asked for first: the preview stage is only served to devices
+     * enrolled in the AICore Developer Preview, so it is the narrower option
+     * despite sounding like the more capable one. Preview is still tried
+     * after, in case a device offers that and not the other.
      */
-    private val previewModel by lazy { client(ModelReleaseStage.PREVIEW) }
     private val stableModel by lazy { client(ModelReleaseStage.STABLE) }
+    private val previewModel by lazy { client(ModelReleaseStage.PREVIEW) }
 
     private val json = Json { ignoreUnknownKeys = true; isLenient = true }
 
@@ -73,7 +72,7 @@ class GeminiTabReader(private val context: Context) : TabReader, ModelAvailabili
         var preparing: GenerativeModel? = null
         val notes = mutableListOf<String>()
 
-        listOf("preview" to previewModel, "stable" to stableModel).forEach { (label, candidate) ->
+        listOf("stable" to stableModel, "preview" to previewModel).forEach { (label, candidate) ->
             val status = runCatching { candidate.checkStatus() }
             status.onFailure { error ->
                 notes += "$label threw ${error::class.simpleName}: ${error.message.orEmpty().take(80)}"
