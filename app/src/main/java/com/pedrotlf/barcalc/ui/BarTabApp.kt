@@ -155,7 +155,13 @@ fun BarTabApp(vm: TabViewModel? = null) {
                 enter = fadeIn(tween(160)),
                 exit = fadeOut(tween(120)),
             ) {
-                ScanReviewScreen(state.scanning, state.scanResult, state.modelAvailability, onAction)
+                ScanReviewScreen(
+                    scanning = state.scanning,
+                    result = state.scanResult,
+                    modelAvailability = state.modelAvailability,
+                    modelStatusDetail = state.modelStatusDetail,
+                    onAction = onAction,
+                )
             }
 
             // History lives above the wizard but below the drawer and dialogs.

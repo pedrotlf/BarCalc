@@ -2,6 +2,7 @@ package com.pedrotlf.barcalc
 
 import com.pedrotlf.barcalc.data.receipt.ModelAvailability
 import com.pedrotlf.barcalc.data.receipt.ModelAvailabilityProbe
+import com.pedrotlf.barcalc.data.receipt.ModelStatus
 import com.pedrotlf.barcalc.data.receipt.ReadingSource
 import com.pedrotlf.barcalc.data.receipt.TabReader
 import com.pedrotlf.barcalc.data.receipt.TabReading
@@ -45,7 +46,7 @@ class ReceiptScanTest {
         // Which reader won doesn't say whether the model was missing, still
         // downloading, or just found nothing — this is what distinguishes them.
         val probe = object : ModelAvailabilityProbe {
-            override suspend fun availability() = ModelAvailability.UNSUPPORTED
+            override suspend fun status() = ModelStatus(ModelAvailability.UNSUPPORTED, "stub")
         }
         val vm = TabViewModel(
             tabReader = FakeRecognizer(Result.success("Nachos 12,00")),

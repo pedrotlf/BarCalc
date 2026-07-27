@@ -36,7 +36,9 @@ import kotlinx.serialization.json.Json
  */
 class GeminiTabReader(private val context: Context) : TabReader, ModelAvailabilityProbe {
 
-    override suspend fun availability(): ModelAvailability = resolveModel().availability
+    override suspend fun status(): ModelStatus = resolveModel().let {
+        ModelStatus(it.availability, it.detail)
+    }
 
     /**
      * Feeding the model a picture is a preview capability, so the preview
@@ -54,24 +56,48 @@ class GeminiTabReader(private val context: Context) : TabReader, ModelAvailabili
         generationConfig { modelConfig = modelConfig { releaseStage = stage } },
     )
 
-    private class Resolved(val model: GenerativeModel?, val availability: ModelAvailability)
+    private class Resolved(
+        val model: GenerativeModel?,
+        val availability: ModelAvailability,
+        val detail: String,
+    )
 
-    /** The first model this device will actually give us, preview preferred. */
+    /**
+     * The first model this device will actually give us, preview preferred.
+     *
+     * Whatever each stage reported is recorded, error included, so a device
+     * that genuinely lacks the model can be told apart from a call that threw
+     * on the way to asking.
+     */
     private suspend fun resolveModel(): Resolved {
         var preparing: GenerativeModel? = null
-        listOf(previewModel, stableModel).forEach { candidate ->
-            when (runCatching { candidate.checkStatus() }.getOrNull()) {
-                FeatureStatus.AVAILABLE ->
-                    return Resolved(candidate, ModelAvailability.AVAILABLE)
-                FeatureStatus.DOWNLOADABLE, FeatureStatus.DOWNLOADING ->
+        val notes = mutableListOf<String>()
+
+        listOf("preview" to previewModel, "stable" to stableModel).forEach { (label, candidate) ->
+            val status = runCatching { candidate.checkStatus() }
+            status.onFailure { error ->
+                notes += "$label threw ${error::class.simpleName}: ${error.message.orEmpty().take(80)}"
+            }
+            when (val code = status.getOrNull()) {
+                null -> Unit
+                FeatureStatus.AVAILABLE -> {
+                    notes += "$label=available"
+                    return Resolved(candidate, ModelAvailability.AVAILABLE, notes.joinToString("; "))
+                }
+                FeatureStatus.DOWNLOADABLE, FeatureStatus.DOWNLOADING -> {
+                    notes += "$label=${if (code == FeatureStatus.DOWNLOADING) "downloading" else "downloadable"}"
                     if (preparing == null) preparing = candidate
-                else -> Unit
+                }
+                else -> notes += "$label=unavailable($code)"
             }
         }
-        return if (preparing != null) {
-            Resolved(preparing, ModelAvailability.PREPARING)
-        } else {
-            Resolved(null, ModelAvailability.UNSUPPORTED)
+
+        val detail = notes.joinToString("; ")
+        return when {
+            preparing != null -> Resolved(preparing, ModelAvailability.PREPARING, detail)
+            // Every stage threw, so nothing is actually known about the device.
+            notes.all { "threw" in it } -> Resolved(null, ModelAvailability.UNKNOWN, detail)
+            else -> Resolved(null, ModelAvailability.UNSUPPORTED, detail)
         }
     }
 

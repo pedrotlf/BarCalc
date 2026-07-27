@@ -64,6 +64,7 @@ fun ScanReviewScreen(
     scanning: Boolean,
     result: ScanResult?,
     modelAvailability: ModelAvailability,
+    modelStatusDetail: String,
     onAction: (TabAction) -> Unit,
 ) {
     val currency = LocalCurrencySymbol.current
@@ -109,7 +110,7 @@ fun ScanReviewScreen(
                 leading = { HeaderCloseButton { onAction(TabAction.DismissScanResult) } },
             )
 
-            if (!scanning) ModelStatusLine(modelAvailability)
+            if (!scanning) ModelStatusLine(modelAvailability, modelStatusDetail)
 
             when {
                 scanning -> ScanningIndicator()
@@ -158,7 +159,14 @@ fun ScanReviewScreen(
  * still downloading, or having found nothing.
  */
 @Composable
-private fun ModelStatusLine(availability: ModelAvailability) {
+private fun ModelStatusLine(availability: ModelAvailability, detail: String) {
+    Column(
+        Modifier.padding(
+            start = BarTabDimens.ScreenHPadding,
+            end = BarTabDimens.ScreenHPadding,
+            top = 6.dp,
+        ),
+    ) {
     Text(
         stringResource(
             when (availability) {
@@ -169,12 +177,13 @@ private fun ModelStatusLine(availability: ModelAvailability) {
             },
         ),
         style = BarTabType.Caption,
-        modifier = Modifier.padding(
-            start = BarTabDimens.ScreenHPadding,
-            end = BarTabDimens.ScreenHPadding,
-            top = 6.dp,
-        ),
     )
+    // What each stage actually reported. Comes out with the raw-text panel in
+    // phase five; until then it is the only way to tell why.
+    if (detail.isNotBlank()) {
+        Text(detail, style = BarTabType.Hint)
+    }
+    }
 }
 
 @Composable
@@ -322,6 +331,7 @@ private fun ScanReviewScreenPreview() {
             scanning = false,
             result = ScanResult.Read(drafts, PreviewRawText),
             modelAvailability = ModelAvailability.AVAILABLE,
+            modelStatusDetail = "preview=available",
             onAction = {},
         )
     }
@@ -338,6 +348,7 @@ private fun ScanReviewScreenPartialPreview() {
             scanning = false,
             result = ScanResult.Read(drafts, PreviewRawText),
             modelAvailability = ModelAvailability.AVAILABLE,
+            modelStatusDetail = "preview=available",
             onAction = {},
         )
     }
@@ -351,6 +362,7 @@ private fun ScanReviewScreenLoadingPreview() {
             scanning = true,
             result = null,
             modelAvailability = ModelAvailability.AVAILABLE,
+            modelStatusDetail = "preview=available",
             onAction = {},
         )
     }

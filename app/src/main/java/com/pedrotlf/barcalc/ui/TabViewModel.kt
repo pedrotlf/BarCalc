@@ -199,11 +199,12 @@ class TabViewModel(
             val result = reader.read(imageUri)
             // Asked after the read, so a model that finished downloading
             // mid-scan is reported as ready rather than as still preparing.
-            val availability = modelProbe?.availability()
+            val modelStatus = modelProbe?.status()
             _uiState.update {
                 it.copy(
                     scanning = false,
-                    modelAvailability = availability ?: it.modelAvailability,
+                    modelAvailability = modelStatus?.availability ?: it.modelAvailability,
+                    modelStatusDetail = modelStatus?.detail ?: it.modelStatusDetail,
                     scanResult = result.fold(
                         onSuccess = { reading ->
                             val drafts = reading.items

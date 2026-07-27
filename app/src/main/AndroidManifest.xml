@@ -2,6 +2,14 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools">
 
+    <!--
+        Added while working out why the on-device model reports itself as
+        unsupported. The app makes no network calls of its own: tabs, history
+        and scans stay on the device, and the model is fetched by AICore in the
+        system's own process. Drop this again if it turns out not to be needed.
+    -->
+    <uses-permission android:name="android.permission.INTERNET" />
+
     <application
         android:allowBackup="true"
         android:dataExtractionRules="@xml/data_extraction_rules"

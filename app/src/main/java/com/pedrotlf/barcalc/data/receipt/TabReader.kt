@@ -13,9 +13,21 @@ enum class ReadingSource { MODEL, TEXT }
  */
 enum class ModelAvailability { AVAILABLE, PREPARING, UNSUPPORTED, UNKNOWN }
 
+/**
+ * Where the model stands, plus what it actually said.
+ *
+ * [detail] carries the raw status of each model stage, or the error thrown
+ * asking for it. Without it an exception and a genuinely unsupported device
+ * look identical, which turns diagnosis into guesswork.
+ */
+data class ModelStatus(
+    val availability: ModelAvailability,
+    val detail: String = "",
+)
+
 /** Reports whether the on-device model can be used on this device. */
 interface ModelAvailabilityProbe {
-    suspend fun availability(): ModelAvailability
+    suspend fun status(): ModelStatus
 }
 
 /**

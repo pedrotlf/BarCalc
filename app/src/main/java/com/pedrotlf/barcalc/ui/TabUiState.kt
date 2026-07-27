@@ -52,6 +52,8 @@ data class TabUiState(
     val scanning: Boolean = false,
     /** Where the on-device model stands, as of the last scan. */
     val modelAvailability: ModelAvailability = ModelAvailability.UNKNOWN,
+    /** Exactly what each model stage reported, for working out why. */
+    val modelStatusDetail: String = "",
     /** Text recognised from the last scan, or null when nothing is showing. */
     val scanResult: ScanResult? = null,
 ) {
