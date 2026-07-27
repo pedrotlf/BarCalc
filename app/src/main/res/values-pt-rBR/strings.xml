@@ -39,7 +39,8 @@
     </plurals>
 
     <!-- Folha de atribuição -->
-    <string name="claim_instructions">Toque num número para entrar naquela unidade — compartilhar uma com alguém divide o custo.</string>
+    <!-- Cobre os dois controles da folha: caixas de seleção para itens de uma unidade e chips numerados para os demais. -->
+    <string name="claim_instructions">Toque no que esta pessoa consumiu — os números atribuem unidades individuais, e compartilhar uma divide o custo.</string>
     <!-- Chip que atribui/remove todas as unidades de um item de uma vez -->
     <string name="claim_all">Todas</string>
     <string name="unit_price_each">%1$s cada</string>
