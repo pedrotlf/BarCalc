@@ -106,6 +106,19 @@ class TabViewModel(
             TabAction.ScanCancelled -> _uiState.update { it.copy(scanning = false) }
             TabAction.DismissScanResult -> _uiState.update { it.copy(scanResult = null) }
 
+            is TabAction.ToggleScanDraft -> updateDraft(action.id) { it.copy(included = !it.included) }
+            is TabAction.ScanDraftNameChanged ->
+                updateDraft(action.id) { it.copy(name = action.name) }
+            is TabAction.ScanDraftPriceChanged ->
+                updateDraft(action.id) { it.copy(priceCents = action.cents) }
+            is TabAction.IncScanDraftQty -> updateDraft(action.id) {
+                it.copy(qty = (it.qty + 1).coerceAtMost(TabDefaults.QTY_MAX))
+            }
+            is TabAction.DecScanDraftQty -> updateDraft(action.id) {
+                it.copy(qty = (it.qty - 1).coerceAtLeast(1))
+            }
+            TabAction.ConfirmScannedItems -> confirmScannedItems()
+
             TabAction.OpenDrawer -> _uiState.update { it.copy(showDrawer = true) }
             TabAction.CloseDrawer -> _uiState.update { it.copy(showDrawer = false) }
 
@@ -145,6 +158,39 @@ class TabViewModel(
      * never stored: it is handed to the recognizer and forgotten, so nothing
      * of it outlives the scan.
      */
+    /** Edits one scanned line in place, leaving the rest of the review alone. */
+    private inline fun updateDraft(id: Int, crossinline block: (ScanDraft) -> ScanDraft) {
+        _uiState.update { state ->
+            val read = state.scanResult as? ScanResult.Read ?: return@update state
+            state.copy(
+                scanResult = read.copy(
+                    drafts = read.drafts.map { if (it.id == id) block(it) else it },
+                ),
+            )
+        }
+    }
+
+    /**
+     * Adds the kept lines to the tab. They're appended, never replacing what's
+     * already there, so a scan can top up a tab that was started by hand.
+     */
+    private fun confirmScannedItems() {
+        _uiState.update { state ->
+            val read = state.scanResult as? ScanResult.Read ?: return@update state
+            var seq = state.session.itemSeq
+            val scanned = read.included.map { draft ->
+                TabItem.new(seq++, draft.name.trim(), draft.priceCents, draft.qty)
+            }
+            state.copy(
+                session = state.session.copy(
+                    items = state.session.items + scanned,
+                    itemSeq = seq,
+                ),
+                scanResult = null,
+            )
+        }
+    }
+
     private fun recognizeReceipt(imageUri: String) {
         val recognizer = textRecognizer ?: return
         _uiState.update { it.copy(scanning = true, scanResult = null) }
@@ -154,7 +200,11 @@ class TabViewModel(
                 it.copy(
                     scanning = false,
                     scanResult = result.fold(
-                        onSuccess = { text -> ScanResult.Read(ReceiptParser.parse(text), text) },
+                        onSuccess = { text ->
+                            val drafts = ReceiptParser.parse(text)
+                                .mapIndexed { index, item -> ScanDraft.from(index, item) }
+                            ScanResult.Read(drafts, text)
+                        },
                         onFailure = { ScanResult.Failed },
                     ),
                 )

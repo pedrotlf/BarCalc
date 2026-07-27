@@ -42,7 +42,7 @@ import com.pedrotlf.barcalc.ui.screens.PeopleScreen
 import com.pedrotlf.barcalc.ui.screens.RenameEntryDialog
 import com.pedrotlf.barcalc.ui.screens.ResetConfirmDialog
 import com.pedrotlf.barcalc.ui.screens.ResultsScreen
-import com.pedrotlf.barcalc.ui.screens.ScanResultScreen
+import com.pedrotlf.barcalc.ui.screens.ScanReviewScreen
 import com.pedrotlf.barcalc.ui.theme.BarTabColors
 
 /** Root of the wizard: screen switching, claim sheet overlay, back handling. */
@@ -146,7 +146,7 @@ fun BarTabApp(vm: TabViewModel? = null) {
                 enter = fadeIn(tween(160)),
                 exit = fadeOut(tween(120)),
             ) {
-                ScanResultScreen(state.scanning, state.scanResult, onAction)
+                ScanReviewScreen(state.scanning, state.scanResult, onAction)
             }
 
             // History lives above the wizard but below the drawer and dialogs.

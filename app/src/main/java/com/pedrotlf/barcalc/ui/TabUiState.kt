@@ -79,14 +79,43 @@ data class TabUiState(
 sealed interface ScanResult {
 
     /**
-     * The photo was read. [items] is what the parser made of it and [rawText]
-     * is what it worked from — kept alongside so a disappointing parse can be
-     * compared against what was actually on the page. Either may be empty.
+     * The photo was read. [drafts] is what the parser made of it, editable
+     * before any of it reaches the tab, and [rawText] is what it worked from —
+     * kept alongside so a disappointing parse can be compared against what was
+     * actually on the page. Either may be empty.
      */
-    data class Read(val items: List<ParsedItem>, val rawText: String) : ScanResult
+    data class Read(val drafts: List<ScanDraft>, val rawText: String) : ScanResult {
+
+        /** Only the lines the user has kept, ready to become items. */
+        val included: List<ScanDraft> get() = drafts.filter { it.included && it.isUsable }
+
+        val includedTotalCents: Long get() = included.sumOf { it.priceCents * it.qty }
+    }
 
     /** Reading failed outright, e.g. the image couldn't be opened. */
     data object Failed : ScanResult
+}
+
+/**
+ * One scanned line while it's being checked over.
+ *
+ * Scanning can misread, so nothing here is trusted: every field is editable
+ * and every line can be dropped before anything is added to the tab.
+ */
+data class ScanDraft(
+    val id: Int,
+    val name: String,
+    val priceCents: Long,
+    val qty: Int,
+    val included: Boolean = true,
+) {
+    /** A line with no name or no price can't become an item. */
+    val isUsable: Boolean get() = name.isNotBlank() && priceCents > 0L
+
+    companion object {
+        fun from(id: Int, item: ParsedItem) =
+            ScanDraft(id = id, name = item.name, priceCents = item.priceCents, qty = item.qty)
+    }
 }
 
 /** Design defaults, hardcoded per the design's props. */

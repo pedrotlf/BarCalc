@@ -1,7 +1,6 @@
 package com.pedrotlf.barcalc
 
 import com.pedrotlf.barcalc.data.receipt.ReceiptTextRecognizer
-import com.pedrotlf.barcalc.domain.receipt.ParsedItem
 import com.pedrotlf.barcalc.ui.ScanResult
 import com.pedrotlf.barcalc.ui.TabAction
 import com.pedrotlf.barcalc.ui.TabViewModel
@@ -46,7 +45,11 @@ class ReceiptScanTest {
         assertEquals(listOf("content://scan/1.jpg"), recognizer.seen)
         val read = vm.uiState.value.scanResult as ScanResult.Read
         assertEquals("2x Chopp  24,00", read.rawText)
-        assertEquals(listOf(ParsedItem("Chopp", 1200L, 2)), read.items)
+        val draft = read.drafts.single()
+        assertEquals("Chopp", draft.name)
+        assertEquals(1200L, draft.priceCents)
+        assertEquals(2, draft.qty)
+        assertTrue("scanned lines start out kept", draft.included)
         assertFalse(vm.uiState.value.scanning)
     }
 
@@ -70,7 +73,7 @@ class ReceiptScanTest {
 
         val read = vm.uiState.value.scanResult as ScanResult.Read
         assertEquals("", read.rawText)
-        assertTrue(read.items.isEmpty())
+        assertTrue(read.drafts.isEmpty())
     }
 
     @Test
@@ -97,8 +100,113 @@ class ReceiptScanTest {
         assertNull(vm.uiState.value.scanResult)
     }
 
+    // ── Checking over a scan ───────────────────────────────────────────────
+
+    private fun scannedVm(text: String): TabViewModel {
+        val vm = TabViewModel(textRecognizer = FakeRecognizer(Result.success(text)))
+        vm.onAction(TabAction.ReceiptCaptured("content://scan/1.jpg"))
+        return vm
+    }
+
+    private val TabViewModel.read get() = uiState.value.scanResult as ScanResult.Read
+
     @Test
-    fun `scanning never touches the tab`() {
+    fun `confirming adds the kept lines to the tab`() {
+        val vm = scannedVm("2x Chopp 24,00\nNachos 12,00")
+
+        vm.onAction(TabAction.ConfirmScannedItems)
+
+        val items = vm.uiState.value.items
+        assertEquals(listOf("Chopp", "Nachos"), items.map { it.name })
+        assertEquals(listOf(1200L, 1200L), items.map { it.priceCents })
+        assertEquals(listOf(2, 1), items.map { it.qty })
+        assertNull(vm.uiState.value.scanResult)
+    }
+
+    @Test
+    fun `unticked lines are left out`() {
+        val vm = scannedVm("2x Chopp 24,00\nNachos 12,00")
+        val nachos = vm.read.drafts.single { it.name == "Nachos" }
+
+        vm.onAction(TabAction.ToggleScanDraft(nachos.id))
+        vm.onAction(TabAction.ConfirmScannedItems)
+
+        assertEquals(listOf("Chopp"), vm.uiState.value.items.map { it.name })
+    }
+
+    @Test
+    fun `corrections made in the review are what get added`() {
+        val vm = scannedVm("Nachos 12,00")
+        val draft = vm.read.drafts.single()
+
+        vm.onAction(TabAction.ScanDraftNameChanged(draft.id, "Nachos grandes"))
+        vm.onAction(TabAction.ScanDraftPriceChanged(draft.id, 1550L))
+        vm.onAction(TabAction.IncScanDraftQty(draft.id))
+        vm.onAction(TabAction.ConfirmScannedItems)
+
+        val item = vm.uiState.value.items.single()
+        assertEquals("Nachos grandes", item.name)
+        assertEquals(1550L, item.priceCents)
+        assertEquals(2, item.qty)
+    }
+
+    @Test
+    fun `scanned items are added to a tab already in progress, not replacing it`() {
+        val vm = TabViewModel(textRecognizer = FakeRecognizer(Result.success("Nachos 12,00")))
+        vm.onNewItemNameChange("Beer")
+        vm.onNewItemPriceChange(1000L)
+        vm.addItem()
+
+        vm.onAction(TabAction.ReceiptCaptured("content://scan/1.jpg"))
+        vm.onAction(TabAction.ConfirmScannedItems)
+
+        assertEquals(listOf("Beer", "Nachos"), vm.uiState.value.items.map { it.name })
+        // Ids have to keep climbing, or the new rows would collide with the old.
+        assertEquals(2, vm.uiState.value.items.map { it.id }.distinct().size)
+    }
+
+    @Test
+    fun `a line emptied in the review is not added`() {
+        val vm = scannedVm("Nachos 12,00\n2x Chopp 24,00")
+        val nachos = vm.read.drafts.single { it.name == "Nachos" }
+
+        vm.onAction(TabAction.ScanDraftNameChanged(nachos.id, "   "))
+        vm.onAction(TabAction.ConfirmScannedItems)
+
+        assertEquals(listOf("Chopp"), vm.uiState.value.items.map { it.name })
+    }
+
+    @Test
+    fun `the running total counts only the kept lines`() {
+        val vm = scannedVm("2x Chopp 24,00\nNachos 12,00")
+        assertEquals(3600L, vm.read.includedTotalCents)
+
+        vm.onAction(TabAction.ToggleScanDraft(vm.read.drafts.single { it.name == "Nachos" }.id))
+        assertEquals(2400L, vm.read.includedTotalCents)
+    }
+
+    @Test
+    fun `closing the review throws the scan away`() {
+        val vm = scannedVm("Nachos 12,00")
+
+        vm.onAction(TabAction.DismissScanResult)
+
+        assertNull(vm.uiState.value.scanResult)
+        assertTrue(vm.uiState.value.items.isEmpty())
+    }
+
+    @Test
+    fun `quantity in the review stays at one or above`() {
+        val vm = scannedVm("Nachos 12,00")
+        val draft = vm.read.drafts.single()
+
+        repeat(3) { vm.onAction(TabAction.DecScanDraftQty(draft.id)) }
+
+        assertEquals(1, vm.read.drafts.single().qty)
+    }
+
+    @Test
+    fun `scanning alone never touches the tab`() {
         // Phase one only reads text; nothing is added until the parser exists.
         val vm = TabViewModel(textRecognizer = FakeRecognizer(Result.success("2x Chopp 24,00")))
         vm.onNewItemNameChange("Beer")

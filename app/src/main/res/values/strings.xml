@@ -54,8 +54,14 @@
 
     <!-- Scanning a tab -->
     <string name="scan_tab">Scan the tab</string>
-    <string name="scan_result_title">Scanned tab</string>
-    <string name="scan_result_subtitle">Here\'s what the camera read. Turning it into items is coming soon.</string>
+    <string name="scan_review_title">Check the scan</string>
+    <string name="scan_review_subtitle">Correct anything that came back wrong, then add it to your tab.</string>
+    <string name="scan_review_warning">Scanning can misread a tab. Check each name and price against it, and untick anything that shouldn\'t be added — the total below should match the tab\'s.</string>
+    <string name="scan_add_items">Add to tab</string>
+    <plurals name="scan_selected_count">
+        <item quantity="one">%1$d item selected</item>
+        <item quantity="other">%1$d items selected</item>
+    </plurals>
     <string name="scan_reading">Reading the tab…</string>
     <string name="scan_failed">That photo couldn\'t be read. Try again with the tab flat and well lit.</string>
     <string name="scan_empty">No text found in that photo. Try again with the tab flat and well lit.</string>
