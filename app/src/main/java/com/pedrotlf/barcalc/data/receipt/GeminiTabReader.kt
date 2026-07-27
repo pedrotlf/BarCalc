@@ -76,7 +76,7 @@ class GeminiTabReader(private val context: Context) : TabReader, ModelAvailabili
         listOf("stable" to stableModel, "preview" to previewModel).forEach { (label, candidate) ->
             val status = runCatching { candidate.checkStatus() }
             status.onFailure { error ->
-                notes += "$label threw ${error::class.simpleName}: ${error.message.orEmpty().take(80)}"
+                notes += "$label threw ${error::class.simpleName}: ${error.message.orEmpty().take(220)}"
             }
             when (val code = status.getOrNull()) {
                 null -> Unit
@@ -117,7 +117,7 @@ class GeminiTabReader(private val context: Context) : TabReader, ModelAvailabili
         withTimeoutOrNull(ProbeTimeoutMs) {
             runCatching { model.generateContent("hi") }.fold(
                 onSuccess = { "generation worked, so the status is stale" },
-                onFailure = { "${it::class.simpleName}: ${it.message.orEmpty().take(120)}" },
+                onFailure = { "${it::class.simpleName}: ${it.message.orEmpty().take(220)}" },
             )
         } ?: "timed out asking"
 
