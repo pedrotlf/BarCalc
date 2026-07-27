@@ -17,6 +17,7 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.widthIn
 import androidx.compose.foundation.rememberScrollState
@@ -185,13 +186,28 @@ private fun ClaimRow(item: TabItem, person: Person, onAction: (TabAction) -> Uni
             }
             if (item.qty == 1) {
                 Box(Modifier.weight(1f), contentAlignment = Alignment.CenterEnd) {
-                    Checkbox(
-                        checked = person.id in item.units[0],
-                        onCheckedChange = {
-                            onAction(TabAction.ToggleUnitClaim(item.id, 0, person.id))
-                        },
-                        colors = accentCheckboxColors(),
-                    )
+                    Box(contentAlignment = Alignment.Center) {
+                        Checkbox(
+                            checked = person.id in item.units[0],
+                            onCheckedChange = {
+                                onAction(TabAction.ToggleUnitClaim(item.id, 0, person.id))
+                            },
+                            colors = accentCheckboxColors(),
+                        )
+                        // Checkbox reserves a 48dp touch target around a much
+                        // smaller tick box, so anchoring to its own corner would
+                        // strand the badge out in the padding. This frame matches
+                        // a unit chip's footprint, which puts the badge in the
+                        // same place relative to the control as it sits there.
+                        Box(Modifier.size(UnitChipSize)) {
+                            ClaimCountBadge(
+                                count = item.units[0].size,
+                                modifier = Modifier
+                                    .align(Alignment.TopEnd)
+                                    .offset(x = BadgeOverhang, y = -BadgeOverhang),
+                            )
+                        }
+                    }
                 }
             } else {
                 val allClaimed = item.allUnitsClaimedBy(person.id)
@@ -228,7 +244,7 @@ private fun ClaimRow(item: TabItem, person: Person, onAction: (TabAction) -> Uni
 private fun AllChip(active: Boolean, onClick: () -> Unit) {
     Box(
         Modifier
-            .defaultMinSize(minWidth = 30.dp, minHeight = 30.dp)
+            .defaultMinSize(minWidth = UnitChipSize, minHeight = UnitChipSize)
             .clip(RoundedCornerShape(9.dp))
             .background(if (active) BarTabColors.Accent500 else BarTabColors.Bg)
             .roundedBorder(
@@ -256,7 +272,7 @@ private fun UnitChip(index: Int, active: Boolean, totalCount: Int, onClick: () -
     Box {
         Box(
             Modifier
-                .defaultMinSize(minWidth = 30.dp, minHeight = 30.dp)
+                .defaultMinSize(minWidth = UnitChipSize, minHeight = UnitChipSize)
                 .clip(RoundedCornerShape(9.dp))
                 .background(if (active) BarTabColors.Accent500 else BarTabColors.Bg)
                 .roundedBorder(
@@ -276,24 +292,41 @@ private fun UnitChip(index: Int, active: Boolean, totalCount: Int, onClick: () -
                 ),
             )
         }
-        if (totalCount > 0) {
-            Box(
-                Modifier
-                    .align(Alignment.TopEnd)
-                    .offset(x = 5.dp, y = (-5).dp)
-                    .defaultMinSize(minWidth = 14.dp)
-                    .height(14.dp)
-                    .clip(RoundedCornerShape(7.dp))
-                    .background(BarTabColors.Accent700)
-                    .padding(horizontal = 2.dp),
-                contentAlignment = Alignment.Center,
-            ) {
-                Text(
-                    "$totalCount",
-                    style = BarTabType.Body.copy(fontSize = 9.sp, color = Color.White),
-                )
-            }
-        }
+        ClaimCountBadge(
+            count = totalCount,
+            modifier = Modifier
+                .align(Alignment.TopEnd)
+                .offset(x = BadgeOverhang, y = -BadgeOverhang),
+        )
+    }
+}
+
+/** Footprint of a unit chip; also the frame the checkbox badge is placed against. */
+private val UnitChipSize = 30.dp
+
+/** How far the badge sits outside the corner of the control it belongs to. */
+private val BadgeOverhang = 5.dp
+
+/**
+ * How many people are on a unit, as a small pill over the control's corner.
+ * Draws nothing when nobody has claimed it.
+ */
+@Composable
+private fun ClaimCountBadge(count: Int, modifier: Modifier = Modifier) {
+    if (count <= 0) return
+    Box(
+        modifier
+            .defaultMinSize(minWidth = 14.dp)
+            .height(14.dp)
+            .clip(RoundedCornerShape(7.dp))
+            .background(BarTabColors.Accent700)
+            .padding(horizontal = 2.dp),
+        contentAlignment = Alignment.Center,
+    ) {
+        Text(
+            "$count",
+            style = BarTabType.Body.copy(fontSize = 9.sp, color = Color.White),
+        )
     }
 }
 
@@ -301,6 +334,35 @@ private fun UnitChip(index: Int, active: Boolean, totalCount: Int, onClick: () -
 @Composable
 private fun ClaimSheetPreview() {
     val state = previewTabState(Screen.PEOPLE)
+    BarCalcTheme {
+        ClaimSheet(
+            person = state.people.first(),
+            personIndex = 0,
+            state = state,
+            onAction = {},
+        )
+    }
+}
+
+/** Single-unit items only, one of them shared, so the checkbox badges read 1 and 2. */
+@Preview(
+    name = "Single-unit items — checkbox badges",
+    showBackground = true,
+    backgroundColor = 0xFFF5EAD8,
+    heightDp = 480,
+)
+@Composable
+private fun ClaimSheetCheckboxBadgePreview() {
+    val base = previewTabState(Screen.PEOPLE)
+    val state = base.copy(
+        session = base.session.copy(
+            items = listOf(
+                TabItem(1, "Nachos", 1200L, 1, listOf(listOf(1, 2))),
+                TabItem(2, "Water", 300L, 1, listOf(listOf(2))),
+                TabItem(3, "Olives", 800L, 1, listOf(emptyList())),
+            ),
+        ),
+    )
     BarCalcTheme {
         ClaimSheet(
             person = state.people.first(),
