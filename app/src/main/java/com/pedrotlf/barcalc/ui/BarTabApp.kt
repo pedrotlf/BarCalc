@@ -76,6 +76,7 @@ fun BarTabApp(vm: TabViewModel? = null) {
             state.activePersonId != null ||
             state.showAbout ||
             state.showResetConfirm ||
+            state.showClearTabConfirm ||
             state.showDrawer ||
             state.showHistory ||
             state.pendingDuplicateId != null ||
@@ -147,6 +148,20 @@ fun BarTabApp(vm: TabViewModel? = null) {
             }
 
             AppDrawer(visible = state.showDrawer, onAction = onAction)
+
+            AnimatedVisibility(
+                visible = state.showClearTabConfirm,
+                enter = fadeIn(tween(160)) + scaleIn(tween(160), initialScale = 0.97f),
+                exit = fadeOut(tween(120)),
+            ) {
+                ConfirmDialog(
+                    title = stringResource(R.string.clear_tab_confirm_title),
+                    message = stringResource(R.string.clear_tab_confirm_message),
+                    confirmText = stringResource(R.string.clear_tab_confirm_confirm),
+                    onConfirm = { onAction(TabAction.ClearTab) },
+                    onDismiss = { onAction(TabAction.DismissClearTab) },
+                )
+            }
 
             AnimatedVisibility(
                 visible = state.pendingDuplicateId != null,

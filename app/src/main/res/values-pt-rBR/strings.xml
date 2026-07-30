@@ -49,6 +49,10 @@
     <string name="reset_confirm_title">Começar uma nova conta?</string>
     <string name="reset_confirm_message">Isso apaga a conta atual — itens, pessoas e o que cada um pediu. Ela é salva no seu histórico antes, então você pode começar de novo a partir dela.</string>
     <string name="reset_confirm_confirm">Começar nova</string>
+    <string name="clear_tab_confirm_title">Descartar esta comanda?</string>
+    <string name="clear_tab_confirm_message">Isso remove todos os itens e pessoas da comanda atual. Ela não será salva no seu histórico, então não dá para recuperar.</string>
+    <string name="clear_tab_confirm_confirm">Descartar</string>
+    <string name="cd_clear_tab">Limpar comanda</string>
     <string name="cd_close">Fechar</string>
     <string name="cd_back">Voltar</string>
 

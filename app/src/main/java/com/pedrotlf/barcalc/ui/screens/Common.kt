@@ -7,6 +7,7 @@ import androidx.compose.foundation.layout.BoxWithConstraints
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.ColumnScope
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.RowScope
 import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -43,10 +44,10 @@ import com.pedrotlf.barcalc.ui.theme.BarTabType
  * control that screen needs: the menu on the root screen, a back arrow
  * deeper in the wizard, an X on screens that dismiss.
  *
- * [action] is an optional screen-level shortcut on the trailing edge. It is
- * only laid out when present — sitting after the flexible title column, so
- * omitting it just gives long subtitles more room rather than moving the
- * title.
+ * [action] holds the screen-level shortcuts on the trailing edge — one
+ * control, or several wrapped in [HeaderActions]. It is only laid out when
+ * present — sitting after the flexible title column, so omitting it just gives
+ * long subtitles more room rather than moving the title.
  */
 @Composable
 fun ScreenHeader(
@@ -118,6 +119,34 @@ fun HeaderHistoryButton(onClick: () -> Unit) {
         iconSize = BarTabDimens.HeaderIcon,
         tint = BarTabColors.Neutral700,
     )
+}
+
+/**
+ * Discards the working tab, sitting alongside the other header controls.
+ * [enabled] is false for an already-empty tab: it greys out rather than
+ * disappearing, so the icons beside it never move.
+ */
+@Composable
+fun HeaderClearTabButton(enabled: Boolean, onClick: () -> Unit) {
+    GhostIconButton(
+        icon = AppIcons.Broom,
+        contentDescription = stringResource(R.string.cd_clear_tab),
+        onClick = onClick,
+        size = BarTabDimens.HeaderSlot,
+        iconSize = BarTabDimens.HeaderIcon,
+        tint = BarTabColors.Neutral700,
+        enabled = enabled,
+    )
+}
+
+/**
+ * Groups several trailing controls in the header's [ScreenHeader] action slot.
+ * The slots are already 48dp around a 28dp glyph, so their own padding spaces
+ * the icons apart — no extra gap needed.
+ */
+@Composable
+fun HeaderActions(content: @Composable RowScope.() -> Unit) {
+    Row(verticalAlignment = Alignment.CenterVertically, content = content)
 }
 
 /** Back arrow for screens that step backwards through the wizard. */

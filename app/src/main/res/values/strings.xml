@@ -49,6 +49,10 @@
     <string name="reset_confirm_title">Start a new tab?</string>
     <string name="reset_confirm_message">This clears the current tab — items, people, and who claimed what. It\'s saved to your history first, so you can start from it again later.</string>
     <string name="reset_confirm_confirm">Start new</string>
+    <string name="clear_tab_confirm_title">Discard this tab?</string>
+    <string name="clear_tab_confirm_message">This removes every item and person from the current tab. It won\'t be saved to your history, so you can\'t get it back.</string>
+    <string name="clear_tab_confirm_confirm">Discard</string>
+    <string name="cd_clear_tab">Clear tab</string>
     <string name="cd_close">Close</string>
     <string name="cd_back">Back</string>
 

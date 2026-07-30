@@ -96,6 +96,10 @@ class TabViewModel(
             TabAction.DismissReset -> _uiState.update { it.copy(showResetConfirm = false) }
             TabAction.Reset -> reset()
 
+            TabAction.RequestClearTab -> _uiState.update { it.copy(showClearTabConfirm = true) }
+            TabAction.DismissClearTab -> _uiState.update { it.copy(showClearTabConfirm = false) }
+            TabAction.ClearTab -> clearTab()
+
             TabAction.ShowAbout -> _uiState.update { it.copy(showAbout = true, showDrawer = false) }
             TabAction.HideAbout -> _uiState.update { it.copy(showAbout = false) }
 
@@ -339,6 +343,9 @@ class TabViewModel(
             state.showHistory -> { _uiState.update { it.copy(showHistory = false) }; true }
             state.showDrawer -> { _uiState.update { it.copy(showDrawer = false) }; true }
             state.showResetConfirm -> { _uiState.update { it.copy(showResetConfirm = false) }; true }
+            state.showClearTabConfirm -> {
+                _uiState.update { it.copy(showClearTabConfirm = false) }; true
+            }
             state.activePersonId != null -> { closeSheet(); true }
             state.screen == Screen.RESULTS -> { updateSession { it.copy(screen = Screen.PEOPLE) }; true }
             state.screen == Screen.PEOPLE -> { updateSession { it.copy(screen = Screen.ITEMS) }; true }
@@ -357,13 +364,22 @@ class TabViewModel(
 
     /**
      * Finish the tab: archive it to history first (so nothing is ever lost),
-     * then clear the working session. Empty tabs aren't worth archiving.
+     * then clear the working session.
      */
-    fun reset() {
-        val finished = _uiState.value.session
+    fun reset() = wipeTab(archive = true)
+
+    /**
+     * Discard the tab outright — same wipe as [reset] but nothing is kept.
+     * For a tab entered by mistake, which would only clutter the history.
+     */
+    fun clearTab() = wipeTab(archive = false)
+
+    /** Empty tabs aren't worth archiving even when [archive] is set. */
+    private fun wipeTab(archive: Boolean) {
+        val discarded = _uiState.value.session
         _uiState.update { TabUiState(history = it.history) }
         viewModelScope.launch {
-            if (finished.items.isNotEmpty()) history?.archive(finished)
+            if (archive && discarded.items.isNotEmpty()) history?.archive(discarded)
             repository?.clear()
         }
     }

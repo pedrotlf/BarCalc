@@ -19,6 +19,7 @@ class TabActionKeyboardTest {
             TabAction.ShowHistory,
             TabAction.ShowAbout,
             TabAction.RequestReset,
+            TabAction.RequestClearTab,
             TabAction.RequestClearHistory,
             TabAction.OpenPerson(1),
             TabAction.RequestDuplicate(1L),
@@ -59,6 +60,7 @@ class TabActionKeyboardTest {
             TabAction.CloseDrawer,
             TabAction.DismissRename,
             TabAction.DismissReset,
+            TabAction.DismissClearTab,
         )
         actions.forEach { assertFalse("$it should keep the keyboard", it.dismissesKeyboard) }
     }
