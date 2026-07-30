@@ -51,6 +51,30 @@ object AppIcons {
         )
     }
 
+    /**
+     * Sweeping away the whole tab, as opposed to [Trash] deleting one row.
+     *
+     * Kept to three paths at the set's 2.75 stroke: finer detail (bristles,
+     * sweep marks, a hollow handle) needs a much lighter stroke and would sit
+     * oddly beside [History] and [Menu] in the same header. The binding line
+     * is load-bearing — without it the head reads as a shovel.
+     *
+     * Laid on a 45° diagonal so it spans 3..21 in both axes, like [History]
+     * does; a steeper, more upright broom has a narrow bounding box and reads
+     * as the smaller icon of the pair however much it is scaled up.
+     */
+    val Broom: ImageVector by lazy {
+        strokeIcon(
+            "Broom",
+            // Handle, ending at the midpoint of the binding below.
+            "M21.0 3.0 L13.0 11.0",
+            // Bristle block: flared, with the sweeping edge bowed outward.
+            "M10.9 8.8 L3.0 13.2 Q4.3 19.7 10.8 21.0 L15.2 13.1 Z",
+            // The binding.
+            "M6.7 11.1 L12.9 17.3",
+        )
+    }
+
     val ChevronRight: ImageVector by lazy {
         strokeIcon("ChevronRight", "M9 18 L15 12 L9 6")
     }

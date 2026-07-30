@@ -129,7 +129,7 @@ fun HeaderHistoryButton(onClick: () -> Unit) {
 @Composable
 fun HeaderClearTabButton(enabled: Boolean, onClick: () -> Unit) {
     GhostIconButton(
-        icon = AppIcons.Trash,
+        icon = AppIcons.Broom,
         contentDescription = stringResource(R.string.cd_clear_tab),
         onClick = onClick,
         size = BarTabDimens.HeaderSlot,
