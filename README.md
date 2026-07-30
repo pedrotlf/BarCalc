@@ -22,6 +22,10 @@ A three-step wizard:
 3. **Results** — a per-person total, expandable into a breakdown of each item,
    their subtotal, and their share of the tip.
 
+Finishing a tab files it in **history**, where it can be renamed, deleted, or
+reopened as the starting point for a new tab. A tab you'd rather not keep can be
+cleared outright from the Items or People header instead.
+
 Highlights:
 
 - **Exact-cent math.** All money is integer cents; uneven splits hand out the
@@ -34,6 +38,11 @@ Highlights:
 - **POS-style money entry.** Prices accumulate from the right as you type — key
   `1 0 5 0` and the field reads `10.50` — so amounts are always two decimals.
 - **Persists across restarts.** An in-progress tab is saved and restored.
+- **Tab history.** Finished tabs are archived on-device, so a regular Friday
+  round can be reopened and reused instead of retyped.
+- **Nothing leaves the device.** No accounts, no ads, no analytics — the app
+  declares *zero* Android permissions and contains no networking code. See
+  [`PRIVACY.md`](PRIVACY.md).
 - **Localized** in English and Brazilian Portuguese (`pt-BR`), including the
   currency symbol.
 
@@ -45,7 +54,10 @@ Highlights:
   exposes immutable `TabUiState` via `StateFlow`; the UI sends `sealed TabAction`
   events through one `onAction` entry point, so screens are pure and previewable
 - **Domain:** a dependency-free `SplitCalculator` (pure Kotlin, fully unit-tested)
-- **Persistence:** Jetpack DataStore + `kotlinx.serialization` (JSON)
+- **Persistence:** Jetpack DataStore + `kotlinx.serialization` (JSON) for the
+  in-progress tab; Room (via KSP, schemas exported) for the finished-tab history,
+  behind a `HistoryStore` interface so the view model stays testable without
+  Android
 - **Build:** Android Gradle Plugin 9.1 (built-in Kotlin 2.2.10), Gradle version
   catalog
 
@@ -54,19 +66,23 @@ Highlights:
 ```
 app/src/main/java/com/pedrotlf/barcalc/
 ├── MainActivity.kt
-├── domain/                  # pure, Android-free
-│   ├── TabItem.kt · Person.kt
-│   └── SplitCalculator.kt    # the split engine (integer cents)
+├── domain/                   # pure, Android-free
+│   ├── TabItem.kt · Person.kt · HistoryEntry.kt
+│   └── SplitCalculator.kt     # the split engine (integer cents)
 ├── data/
-│   └── SessionRepository.kt  # DataStore-backed session persistence
+│   ├── SessionRepository.kt   # DataStore-backed in-progress tab
+│   └── history/               # Room entity · DAO · database
+│       └── HistoryStore.kt    # the seam the view model is tested against
 └── ui/
-    ├── BarTabApp.kt          # root: screen switching + claim-sheet overlay
+    ├── BarTabApp.kt           # root: screen switching + overlay stack
     ├── TabViewModel.kt · TabUiState.kt · TabAction.kt
-    ├── theme/                # Color · Type · Dimens · Theme
-    ├── components/           # reusable composables + Modifiers
-    └── screens/              # Items · People · ClaimSheet · Results
+    ├── theme/                 # Color · Type · Dimens · Theme
+    ├── components/            # reusable composables · AppIcons · Modifiers
+    └── screens/               # Items · People · ClaimSheet · Results · History
+                               #   + drawer, About, confirmation dialogs
 
-app/src/test/…               # JUnit tests for the split engine + view model
+app/schemas/                   # exported Room schemas (checked in)
+app/src/test/…                 # JUnit: split engine, view model, persistence
 ```
 
 ## Building & running
@@ -81,7 +97,7 @@ emulator (`minSdk 28`).
 # Install on a connected device/emulator
 ./gradlew :app:installDebug
 
-# Unit tests (the split engine + view model)
+# Unit tests (split engine, view model, persistence)
 ./gradlew :app:testDebugUnitTest
 ```
 
