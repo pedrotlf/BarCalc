@@ -79,6 +79,13 @@ fun PeopleScreen(state: TabUiState, onAction: (TabAction) -> Unit) {
             title = stringResource(R.string.people_title),
             subtitle = stringResource(R.string.people_subtitle),
             leading = { HeaderBackButton { onAction(TabAction.Back) } },
+            // Reachable here too, so a tab can be abandoned without stepping
+            // back to Items first. Always enabled: this screen needs items.
+            action = {
+                HeaderClearTabButton(enabled = state.hasWorkInProgress) {
+                    onAction(TabAction.RequestClearTab)
+                }
+            },
         )
         AddPersonCard(state, onAction)
         if (state.people.isNotEmpty()) {

@@ -132,7 +132,11 @@ fun PrimaryIconButton(
     }
 }
 
-/** Ghost icon button (.btn-ghost .btn-icon): transparent, accent-tinted glyph. */
+/**
+ * Ghost icon button (.btn-ghost .btn-icon): transparent, accent-tinted glyph.
+ * Disabled it keeps its space and greys out, so a button that comes and goes
+ * with the state doesn't shift the row around it.
+ */
 @Composable
 fun GhostIconButton(
     icon: ImageVector,
@@ -142,15 +146,21 @@ fun GhostIconButton(
     size: Dp = 36.dp,
     iconSize: Dp = 15.dp,
     tint: Color = BarTabColors.Accent500,
+    enabled: Boolean = true,
 ) {
     Box(
         modifier = modifier
             .size(size)
             .clip(CircleShape)
-            .clickable(onClick = onClick),
+            .clickable(enabled = enabled, onClick = onClick),
         contentAlignment = Alignment.Center,
     ) {
-        Icon(icon, contentDescription, Modifier.size(iconSize), tint = tint)
+        Icon(
+            icon,
+            contentDescription,
+            Modifier.size(iconSize),
+            tint = if (enabled) tint else BarTabColors.Neutral400,
+        )
     }
 }
 

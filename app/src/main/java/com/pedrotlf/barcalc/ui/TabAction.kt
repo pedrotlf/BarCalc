@@ -48,6 +48,19 @@ sealed interface TabAction {
     /** Confirmed: wipe the tab and start fresh. */
     data object Reset : TabAction
 
+    // ── Clear tab ──────────────────────────────────────────────────────────
+    // Like [Reset], but discards instead of archiving — for a tab that was
+    // entered by mistake and isn't worth keeping.
+
+    /** Ask to discard the tab — opens the confirmation dialog (see [ClearTab]). */
+    data object RequestClearTab : TabAction
+
+    /** Dismiss the discard confirmation without wiping anything. */
+    data object DismissClearTab : TabAction
+
+    /** Confirmed: wipe the tab without saving it to history. */
+    data object ClearTab : TabAction
+
     // ── About ──────────────────────────────────────────────────────────────
     data object ShowAbout : TabAction
     data object HideAbout : TabAction
@@ -107,6 +120,7 @@ val TabAction.dismissesKeyboard: Boolean
         TabAction.ShowAbout,
         // Sheets and dialogs that cover the screen.
         TabAction.RequestReset,
+        TabAction.RequestClearTab,
         TabAction.RequestClearHistory,
         is TabAction.OpenPerson,
         is TabAction.RequestDuplicate,

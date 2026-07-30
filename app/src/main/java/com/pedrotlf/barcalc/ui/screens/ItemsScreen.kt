@@ -81,13 +81,21 @@ fun ItemsScreen(state: TabUiState, onAction: (TabAction) -> Unit) {
         },
     ) {
         // Root screen: the nav slot holds the drawer toggle rather than a back
-        // arrow, plus a shortcut to history — the most likely reason to open
-        // the menu from here is to start a new tab from an old one.
+        // arrow, plus shortcuts to history — the most likely reason to open
+        // the menu from here is to start a new tab from an old one — and to
+        // clearing this tab, which otherwise means deleting each item by hand.
         ScreenHeader(
             title = stringResource(R.string.items_title),
             subtitle = stringResource(R.string.items_subtitle),
             leading = { HeaderMenuButton { onAction(TabAction.OpenDrawer) } },
-            action = { HeaderHistoryButton { onAction(TabAction.ShowHistory) } },
+            action = {
+                HeaderActions {
+                    HeaderHistoryButton { onAction(TabAction.ShowHistory) }
+                    HeaderClearTabButton(enabled = state.hasWorkInProgress) {
+                        onAction(TabAction.RequestClearTab)
+                    }
+                }
+            },
         )
         AddItemCard(state, onAction)
         if (state.items.isNotEmpty()) {

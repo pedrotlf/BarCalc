@@ -35,6 +35,7 @@ data class TabUiState(
     val expandedResultIds: Set<Int> = emptySet(),
     val showAbout: Boolean = false,
     val showResetConfirm: Boolean = false,
+    val showClearTabConfirm: Boolean = false,
     val showDrawer: Boolean = false,
     val showHistory: Boolean = false,
     val history: List<HistoryEntry> = emptyList(),

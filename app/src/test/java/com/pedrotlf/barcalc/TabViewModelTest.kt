@@ -214,6 +214,48 @@ class TabViewModelTest {
     }
 
     @Test
+    fun `clearing the tab discards it instead of archiving it`() {
+        val store = FakeHistoryStore()
+        val vm = TabViewModel(history = store)
+
+        // An earlier tab, properly finished, so we can prove clearing later
+        // wipes only the working tab and not the history behind it.
+        vm.onNewItemNameChange("Nachos")
+        vm.onNewItemPriceChange(1200L)
+        vm.addItem()
+        vm.onAction(TabAction.Reset)
+        assertEquals(1, vm.uiState.value.history.size)
+
+        vm.onNewItemNameChange("Beer")
+        vm.onNewItemPriceChange(1000L)
+        vm.addItem()
+        vm.onNewPersonNameChange("Alice")
+        vm.addPerson()
+
+        // Requesting only opens the confirmation — data stays intact.
+        vm.onAction(TabAction.RequestClearTab)
+        assertTrue(vm.uiState.value.showClearTabConfirm)
+        assertEquals(1, vm.uiState.value.items.size)
+
+        // Dismissing — by button or by system back — leaves the tab intact.
+        vm.onAction(TabAction.DismissClearTab)
+        assertFalse(vm.uiState.value.showClearTabConfirm)
+        vm.onAction(TabAction.RequestClearTab)
+        assertTrue(vm.goBack())
+        assertFalse(vm.uiState.value.showClearTabConfirm)
+        assertEquals(1, vm.uiState.value.items.size)
+
+        // Only a confirmed clear wipes it, and it is not kept anywhere.
+        vm.onAction(TabAction.RequestClearTab)
+        vm.onAction(TabAction.ClearTab)
+        assertTrue(vm.uiState.value.items.isEmpty())
+        assertTrue(vm.uiState.value.people.isEmpty())
+        assertFalse(vm.uiState.value.hasWorkInProgress)
+        assertEquals(listOf("Nachos"), store.archived.map { it.items.single().name })
+        assertEquals(1, vm.uiState.value.history.size)
+    }
+
+    @Test
     fun `an empty tab is not archived`() {
         val store = FakeHistoryStore()
         val vm = TabViewModel(history = store)
